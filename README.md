@@ -2,7 +2,7 @@
 # Pre installe 
 ## install php composer
 ## Run 
-   compose install
+   composer install
 ## To update composer.json
 ## Run
    composer update
