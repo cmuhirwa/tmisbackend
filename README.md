@@ -1,5 +1,5 @@
 # tmisbackend
-# Pre installe 
+# Pre required dependance 
 ## install php composer
 ## Run 
    composer install
