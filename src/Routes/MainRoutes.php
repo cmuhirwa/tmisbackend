@@ -23,6 +23,7 @@ class MainRoutes {
         //$_REQUEST['uri'] will be empty if req uri is /
         //Request method
         $request_method = $_SERVER['REQUEST_METHOD'];
+        $params = [];
 
         if(!empty($_REQUEST['uri'])){
             $route = preg_replace("/(^\/)|(\/$)/","",$route);
@@ -42,7 +43,7 @@ class MainRoutes {
         
     }
 
-    function add($route,$file){
+    function router($route,$file){
 
         //will store all the parameters value in this array
         $params = [];
@@ -58,10 +59,9 @@ class MainRoutes {
 
         //if the route does not contain any param call simpleRoute();
         if(empty($paramMatches[0])){
-            $this->simpleRoute($file,$route);
+            $this->simpleRoute($route,$file);
             return;
         }
-        print_r($paramMatches[0]);
 
         //setting parameters names
         foreach($paramMatches[0] as $key){
