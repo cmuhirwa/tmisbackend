@@ -21,6 +21,9 @@ class MainRoutes {
     public function simpleRoute($route, $file){        
         //replacing first and last forward slashes
         //$_REQUEST['uri'] will be empty if req uri is /
+        //Request method
+        $request_method = $_SERVER['REQUEST_METHOD'];
+
         if(!empty($_REQUEST['uri'])){
             $route = preg_replace("/(^\/)|(\/$)/","",$route);
             $reqUri =  preg_replace("/(^\/)|(\/$)/","",$_REQUEST['uri']);
@@ -47,17 +50,18 @@ class MainRoutes {
         //will store all the parameters names in this array
         $paramKey = [];
 
-        //finding if there is any {?} parameter in $route
-        preg_match_all("/(?<={).+?(?=})/", $route, $paramMatches);
-
         //Request method
         $request_method = $_SERVER['REQUEST_METHOD'];
+
+        //finding if there is any {?} parameter in $route
+        preg_match_all("/(?<={).+?(?=})/", $route, $paramMatches);
 
         //if the route does not contain any param call simpleRoute();
         if(empty($paramMatches[0])){
             $this->simpleRoute($file,$route);
             return;
         }
+        print_r($paramMatches[0]);
 
         //setting parameters names
         foreach($paramMatches[0] as $key){
@@ -121,6 +125,7 @@ class MainRoutes {
             exit();
         }
     }
+    
     public function notFound($file){
         include($file);
         exit();
