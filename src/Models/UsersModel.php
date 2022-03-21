@@ -9,7 +9,25 @@ class UsersModel {
     {
       $this->db = $db;
     }
-
+    public function insert(){
+      $statement = "
+        INSERT 
+          INTO users 
+            (firstName,lastName,phone,email,username,password,role,status,createdBy,updatedBy,archivedBy)
+          VALUES (:firstName,?,?,?,?,?,?,?,?,?,?);
+        ";
+        try {
+          $statement = $this->db->prepare($statement);
+          $statement->execute(array(
+              ':firstName' => $data['firstName'],
+              ':lastName' => $input['email'],
+              ':phone' => $input['phone'],
+          ));
+          return $statement->rowCount();
+        } catch (\PDOException $e) {
+          exit($e->getMessage());
+        }
+    }
     public function findAll()
     {
       $statement = "
@@ -34,14 +52,17 @@ class UsersModel {
           SELECT 
               *
           FROM
-              users WHERE user_id = ? AND status = ?
+              users WHERE Id = ? AND status = ?
       ";
 
       try {
         $statement = $this->db->prepare($statement);
         $statement->execute(array($user_id,1));
         $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        return $result[0];
+        if(sizeof($result) == 0){
+          return null;
+        }
+        return $result;
       } catch (\PDOException $e) {
           exit($e->getMessage());
       }
