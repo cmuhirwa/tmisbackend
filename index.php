@@ -13,7 +13,6 @@ use Src\Routes\MainRoutes;
 $route = new MainRoutes();
 
 //route address and home.php file location
-echo $_REQUEST['uri'];
 
 // Users routes
 $route->add("/user/login", "src/Controller/userscontroller.php");
