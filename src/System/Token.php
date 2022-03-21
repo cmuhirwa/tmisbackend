@@ -4,8 +4,8 @@ use Src\System\Session;
 
 class Token {
 
-    public static function generate($token_name){
-		return Session::put($token_name,self::randomString(32));
+    public static function generate($token_name,$user_id){
+		return Session::put($token_name,self::randomString(32)."$".$user_id);
 	}
 	public static function checkToken($token,$token_name){
 		if(Session::exists($token_name) && $token == Session::get($token_name)){
