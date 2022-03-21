@@ -27,5 +27,24 @@ class UsersModel {
           exit($e->getMessage());
       }
     }
+
+    public function findOne($user_id)
+    {
+      $statement = "
+          SELECT 
+              *
+          FROM
+              users WHERE user_id = ? AND status = ?
+      ";
+
+      try {
+        $statement = $this->db->prepare($statement);
+        $statement->execute(array($user_id,1));
+        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        return $result[0];
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }
+    }
 }
 ?>

@@ -15,9 +15,8 @@ $route = new MainRoutes();
 //route address and home.php file location
 
 // Users routes
-$route->add("/user/login", "src/Controller/userscontroller.php");
-
-// $route->add("/user/{id}","src/Controller/userscontroller.php");
+$route->router("/user", "src/Controller/userscontroller.php");
+$route->router("/user/{id}","src/Controller/userscontroller.php");
 
 //write it at the last
 //arg is 404 file location
