@@ -16,6 +16,7 @@ $route = new MainRoutes();
 
 // Users routes
 $route->router("/user", "src/Controller/userscontroller.php");
+$route->router("/user/login", "src/Controller/authcontroller.php");
 $route->router("/user/{id}","src/Controller/userscontroller.php");
 
 //write it at the last

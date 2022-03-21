@@ -2,6 +2,7 @@
   namespace Src\Controller;
 
   use Src\Models\UsersModel;
+  use Src\System\Errors;
 
     class UsersController {
     private $db;
@@ -28,7 +29,7 @@
               }
               break;
             default:
-              $response = notFoundResponse();
+              $response = Errors::notFoundError();
               break;
         }
         header($response['status_code_header']);
@@ -36,16 +37,24 @@
             echo $response['body'];
         }
     }
+
+    function insert(){
+
+      $result = $this->usersModel->insert($data);
+
+      $response['status_code_header'] = 'HTTP/1.1 200 OK';
+      $response['body'] = json_encode($result);
+      return $response;
+    }
     // Get all users
     function getUsers()
     {
 
-        // $result = ["id"=> $params["id"]]; 
-        $result = $this->usersModel->findAll();
+      $result = $this->usersModel->findAll();
 
-        $response['status_code_header'] = 'HTTP/1.1 200 OK';
-        $response['body'] = json_encode($result);
-        return $response;
+      $response['status_code_header'] = 'HTTP/1.1 200 OK';
+      $response['body'] = json_encode($result);
+      return $response;
     }
     // Get a user by id 
     function getUser($params)
