@@ -47,5 +47,28 @@ class AuthModel {
           exit($e->getMessage());
       }
     }
+
+  public function delete($user_id,$status)
+  {
+      $sql = "
+          UPDATE 
+              auth
+          SET 
+              status = :status
+          WHERE user_id = :user_id;
+      ";
+
+      try {
+          $statement = $this->db->prepare($sql);
+          $statement->execute(array(
+            ':user_id' => $user_id,
+            ':status' =>$status
+          ));
+
+          return $statement->rowCount();
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }    
+  }
 }
 ?>
