@@ -9,24 +9,22 @@ class UsersModel {
     {
       $this->db = $db;
     }
-    public function insert(){
+    public function insert($data){
       $statement = "
         INSERT 
           INTO users 
-            (firstName,lastName,phone,email,username,password,role,createdBy,updatedBy)
-          VALUES (:firstName,:lastName,:phone,:email,:username,:password,:role,:createdBy);
+            (user_id,first_name,last_name,phone,email,role_id)
+          VALUES (:user_id,:first_name,:last_name,:phone,:email,:role_id);
         ";
         try {
           $statement = $this->db->prepare($statement);
           $statement->execute(array(
-              ':firstName' => $data['firstName'],
-              ':lastName' => $data['lastName'],
+              ':user_id' => $data['user_id'],
+              ':first_name' => $data['first_name'],
+              ':last_name' => $data['last_name'],
               ':phone' => $data['phone'],
               ':email' => $data['email'],
-              ':username' => $data['username'],
-              ':password' => $data['password'],
-              ':role' => $data['role'],
-              ':createdBy' => $data['createdBy']
+              ':role_id' => $data['role_id'],
           ));
           return $statement->rowCount();
         } catch (\PDOException $e) {
@@ -57,7 +55,7 @@ class UsersModel {
           SELECT 
               *
           FROM
-              users WHERE user_id = ? AND status = ?
+              users WHERE user_id = ? AND status = ? LIMIT 1
       ";
 
       try {
@@ -69,14 +67,31 @@ class UsersModel {
           exit($e->getMessage());
       }
     }
+    public function findByPhone($phone)
+    {
+      $statement = "
+          SELECT 
+              *
+          FROM
+              users WHERE phone = ? AND status = ? LIMIT 1
+      ";
 
+      try {
+        $statement = $this->db->prepare($statement);
+        $statement->execute(array($phone,1));
+        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        return $result;
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }
+    }
     public function findOne($user_id)
     {
       $statement = "
           SELECT 
               *
           FROM
-              users WHERE Id = ? AND status = ?
+              users WHERE Id = ? AND status = ? LIMIT 1
       ";
 
       try {

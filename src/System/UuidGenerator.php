@@ -1,8 +1,8 @@
 <?php
 namespace Src\System;
 
-class uiidGeneretor {
-    function guid()
+class UuidGenerator {
+    public static function gUuid()
     {
         $randomString = openssl_random_pseudo_bytes(16);
         $time_low = bin2hex(substr($randomString, 0, 4));

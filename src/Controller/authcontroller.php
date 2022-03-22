@@ -6,6 +6,12 @@ use Src\Models\UsersModel;
 use Src\Models\RolesModel;
 use Src\System\Errors;
 use Src\System\Token;
+use Src\System\Encrypt;
+use Src\System\UuidGenerator;
+use \Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+
 
   class AuthController {
   private $db;
@@ -32,11 +38,15 @@ use Src\System\Token;
             if(sizeof($this->params) == 1){
               $response = $this->getUser($this->params['id']);
             }else{
-              $response = $this->getUsers();
+              $response = $this->getCurrentUser();
             }
             break;
             case 'POST':
-              $response = $this->login();
+              if($this->params['action'] == "create"){
+                $response = $this->createAccount();
+              }else{
+                $response = $this->login();
+              }
               break;
           default:
             $response = Errors::notFoundError();
@@ -50,28 +60,81 @@ use Src\System\Token;
 
   function createAccount(){
       
+    $data = (array) json_decode(file_get_contents('php://input'), TRUE);
+    if (! self::validateAccountData($data)) {
+        return Errors::unprocessableEntityResponse();
+    }
+    // Check if user is registered
+    $user = $this->usersModel->findByPhone($data['phone']);
+    if(sizeof($user) > 0) {
+        return Errors::ExistError("Phone is already exist");
+    }
+    // Encrypting default password
+    $default_password = 12345;
+    $default_password = Encrypt::saltEncryption($default_password);
+
+    // Generate user id 
+    $user_id = UuidGenerator::gUuid();
+
+    $authData['user_id'] = $user_id;
+    $authData['username'] = $data['phone'];
+    $authData['password'] = $default_password;
+
+    $data['user_id'] = $user_id;
+
     $result = $this->usersModel->insert($data);
 
-    $response['status_code_header'] = 'HTTP/1.1 200 OK';
-    $response['body'] = json_encode($result);
+    if($result == 1){
+      $auth = $this->authModel->insert($authData);
+    }
+
+    $response['status_code_header'] = 'HTTP/1.1 201 Created';
+    $response['body'] = json_encode([
+      'message' => "Created"
+    ]);
     return $response;
   }
   // Get all users
-  function getUsers()
+  function getCurrentUser()
   {
+    $data = new \stdClass();
+    $rlt = new \stdClass();
 
-    $result = $this->usersModel->findAll();
+    $all_headers = getallheaders();
+    $data->jwt = $all_headers['Authorization'];
 
-    $response['status_code_header'] = 'HTTP/1.1 200 OK';
-    $response['body'] = json_encode($result);
-    return $response;
+    // Decoding jwt
+    if(empty($data->jwt)){
+      return Errors::notAuthorized();
+    }
+    try {
+      $secret_key = "owt125";
+      $decoded_data = JWT::decode($data->jwt, new Key($secret_key,'HS512'));
+
+      $result = $this->usersModel->findById($decoded_data->data->id);
+      if(sizeof($result) > 0){
+        $role = $this->rolesModel->findById($result[0]['role_id']);
+
+        $rlt->user_info = $result[0];
+        $rlt->role = sizeof($role) > 0 ? $role[0] : null;
+      }else{
+        $rlt = null;
+      }
+
+      $response['status_code_header'] = 'HTTP/1.1 200 OK';
+      $response['body'] = json_encode($rlt);
+      return $response;
+      } catch (\Throwable $e) {
+        return Errors::notAuthorized();
+      }
+
   }
   // Get a user by id 
   function login()
   {
       $input = (array) json_decode(file_get_contents('php://input'), TRUE);
       // Validate input if not empty
-      if(!self::validateLoginInfo($input)){
+      if(!self::validateCredential($input)){
           return Errors::unprocessableEntityResponse();
       }
       $userAuthData = $this->authModel->findOne($input['username']);
@@ -81,9 +144,9 @@ use Src\System\Token;
         'message' => "Username/password does not match"
         ]);      
       }
-
+      $input_password = Encrypt::saltEncryption($input['password']);
       // Password compare
-      if($input['password'] !== $userAuthData[0]['password']){
+      if($input_password !== $userAuthData[0]['password']){
           $response['status_code_header'] = 'HTTP/1.1 400 success!';
           $response['body'] = json_encode([
           'message' => "Username/password does not match"
@@ -93,26 +156,70 @@ use Src\System\Token;
       if(Token::generate("USER_TOKEN",$userAuthData[0]['user_id'])){
         Token::setTokenExpire();
       }
+
       $userInfo = $this->usersModel->findById($userAuthData[0]['user_id']);
+
+      $iss = "localhost";
+      $iat = time();
+      $nbf = $iat + 10;
+      $eat = $iat + 30;
+      $aud = "myusers";
+      $user_array_data = array(
+      "id"=>$userInfo[0]['user_id'],
+      "phone"=>$userInfo[0]['phone'],
+      "email"=>$userInfo[0]['email'],
+      );
+
+      $secret_key = "owt125";
+      $payload_info = array(
+        "iss"=>$iss,
+        "iat"=>$iat,
+        "nbf"=>$nbf,
+        "eat"=>$eat,
+        "aud"=>$aud,
+        "data"=>$user_array_data
+        );
+
+      $jwt = JWT::encode($payload_info,$secret_key,'HS512');
 
       $role = $this->rolesModel->findById($userInfo[0]['role_id']);
 
       $response['status_code_header'] = 'HTTP/1.1 200 OK';
       $response['body'] = json_encode([
       'message' => "Welcome",
-      'token' =>  Token::getToken("USER_TOKEN"),
+      'jwt' =>  $jwt,
       "user_info" => sizeof($userInfo) > 0 ? $userInfo[0] : null,
       "role" => sizeof($role) > 0 ? $role[0] : null
       ]);
       return $response;
   }
 
-  private function validateLoginInfo($input)
+  private function validateCredential($input)
   {
       if (empty($input['username'])) {
           return false;
       }
       if (empty($input['password'])) {
+          return false;
+      }
+      return true;
+  }
+  
+  private function validateAccountData($input)
+  {
+      if (empty($input['first_name'])) {
+          return false;
+      }
+      if (empty($input['last_name'])) {
+          return false;
+      }
+      if (empty($input['phone'])) {
+          return false;
+      }
+      if (empty($input['email'])) {
+          return false;
+      }
+      if (empty($input['role_id'])) {
           return false;
       }
       return true;
