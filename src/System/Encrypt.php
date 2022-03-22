@@ -1,9 +1,9 @@
 <?php
 namespace Src\System;
 
-class Encript {
+class Encrypt {
 
-    public static function saltEncription($value){
+    public static function saltEncryption($value){
         $hash_format = "$2y$10$";
         $salt = "salt22CharactersOrmore";
         $format_and_salt = $hash_format . $salt;

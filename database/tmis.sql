@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Mar 21, 2022 at 01:41 PM
+-- Generation Time: Mar 21, 2022 at 03:23 PM
 -- Server version: 5.7.32
 -- PHP Version: 7.4.12
 
@@ -29,10 +29,10 @@ SET time_zone = "+00:00";
 CREATE TABLE `auth` (
   `auth_id` int(11) NOT NULL,
   `user_id` varchar(255) NOT NULL,
-  `username` varchar(255) NOT NULL,
+  `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `reset_code` varchar(100) NOT NULL,
-  `reset_time` varchar(50) NOT NULL,
+  `reset_code` varchar(100) DEFAULT NULL,
+  `reset_time` varchar(50) DEFAULT NULL,
   `status` int(3) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -41,8 +41,7 @@ CREATE TABLE `auth` (
 --
 
 INSERT INTO `auth` (`auth_id`, `user_id`, `username`, `password`, `reset_code`, `reset_time`, `status`) VALUES
-(1, 'ewqqwewqewqsadsadsa', '0780000000', '12345', '', '', 1),
-(2, 'fgergrthrthrhrtrthtr', '0781111111', '12345', '', '', 1);
+(1, '589a4d2f-9754-446c-8c76-eaa4d8ab181d', '078000000', '$2y$10$salt22CharactersOrmore827ccb0eea8a706c4c34a16891f84e7b', NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -85,8 +84,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `first_name`, `last_name`, `phone`, `email`, `role_id`, `created_at`, `status`) VALUES
-('ewqqwewqewqsadsadsa', 'Janvier', 'Muhawenimana', '0781111111', 'janvier@gmail.com', 1, '2022-03-21 10:44:50', 1),
-('fgergrthrthrhrtrthtr', 'Joseph', 'Shyirambere', '0782222222', 'joseph@gmail.com', 1, '2022-03-21 10:44:50', 1);
+('589a4d2f-9754-446c-8c76-eaa4d8ab181d', 'Emmy', 'Niyongabo', '078000000', 'emm@gmail.com', 1, '2022-03-21 15:11:37', 1);
 
 --
 -- Indexes for dumped tables
@@ -118,7 +116,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `auth`
 --
 ALTER TABLE `auth`
-  MODIFY `auth_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `auth_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `roles`

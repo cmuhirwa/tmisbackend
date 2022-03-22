@@ -9,13 +9,13 @@ class AuthModel {
     {
       $this->db = $db;
     }
-    public function insert(){
+    public function insert($data){
       $statement = "
         INSERT 
           INTO auth 
-            (user_id,username,password,role_id)
+            (user_id,username,password)
           VALUES 
-            (:user_id,:username,:password,:role_id);
+            (:user_id,:username,:password);
         ";
         try {
           $statement = $this->db->prepare($statement);
@@ -23,7 +23,6 @@ class AuthModel {
               ':user_id' => $data['user_id'],
               ':username' => $data['username'],
               ':password' => $data['password'],
-              ':role_id' => $data['role_id']
           ));
           return $statement->rowCount();
         } catch (\PDOException $e) {
