@@ -20,6 +20,10 @@ $route->router("/user/{id}","src/Controller/userscontroller.php");
 $route->router("/user/account/{action}", "src/Controller/authcontroller.php");
 $route->router("/user/account/{action}/{user_id}", "src/Controller/userscontroller.php");
 $route->router("/user/current/info", "src/Controller/authcontroller.php");
+// Plans routes
+$route->router("/plans", "src/Controller/planController.php");
+$route->router("/plan/{id}", "src/Controller/planController.php");
+
 //write it at the last
 //arg is 404 file location
 $route->notFound("404.php");

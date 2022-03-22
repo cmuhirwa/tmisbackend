@@ -40,7 +40,7 @@ class AuthModel {
 
       try {
         $statement = $this->db->prepare($statement);
-        $statement->execute(array($username,1));
+        $statement->execute(array($username,'Active'));
         $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
         return $result;
       } catch (\PDOException $e) {
