@@ -113,8 +113,9 @@ use Firebase\JWT\Key;
     $rlt = new \stdClass();
 
     $all_headers = getallheaders();
-    $data->jwt = $all_headers['Authorization'];
-
+    if(isset($all_headers['Authorization'])){
+      $data->jwt = $all_headers['Authorization'];
+    }
     // Decoding jwt
     if(empty($data->jwt)){
       return Errors::notAuthorized();
