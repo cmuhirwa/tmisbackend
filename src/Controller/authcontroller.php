@@ -36,7 +36,7 @@ use Firebase\JWT\Key;
       switch ($this->request_method) {
           case 'GET':
             if(sizeof($this->params) == 1){
-              $response = $this->getUser($this->params['id']);
+              $response = $this->getUser($this->params['phone']);
             }else{
               $response = $this->getCurrentUser();
             }
@@ -44,12 +44,21 @@ use Firebase\JWT\Key;
             case 'POST':
               if($this->params['action'] == "create"){
                 $response = $this->createAccount();
+              }elseif($this->params['action'] == "login"){
+                $response = $this->login();
+              }else{
+                $response = Errors::notFoundError("Route not found!");
+              }
+              break;
+            case 'DELETE':
+              if($this->params['action'] == "suspend"){
+                $response = $this->createAccount();
               }else{
                 $response = $this->login();
               }
-              break;
+            break;
           default:
-            $response = Errors::notFoundError();
+            $response = Errors::notFoundError("Route not found!");
             break;
       }
       header($response['status_code_header']);
@@ -61,9 +70,11 @@ use Firebase\JWT\Key;
   function createAccount(){
       
     $data = (array) json_decode(file_get_contents('php://input'), TRUE);
+
     if (! self::validateAccountData($data)) {
         return Errors::unprocessableEntityResponse();
     }
+    
     // Check if user is registered
     $user = $this->usersModel->findByPhone($data['phone']);
     if(sizeof($user) > 0) {
@@ -81,11 +92,12 @@ use Firebase\JWT\Key;
     $authData['password'] = $default_password;
 
     $data['user_id'] = $user_id;
+    $data['created_by'] = $user_id;
 
     $result = $this->usersModel->insert($data);
 
     if($result == 1){
-      $auth = $this->authModel->insert($authData);
+      $this->authModel->insert($authData);
     }
 
     $response['status_code_header'] = 'HTTP/1.1 201 Created';
@@ -111,7 +123,7 @@ use Firebase\JWT\Key;
       $secret_key = "owt125";
       $decoded_data = JWT::decode($data->jwt, new Key($secret_key,'HS512'));
 
-      $result = $this->usersModel->findById($decoded_data->data->id);
+      $result = $this->usersModel->findById($decoded_data->data->id,1);
       if(sizeof($result) > 0){
         $role = $this->rolesModel->findById($result[0]['role_id']);
 
@@ -139,30 +151,28 @@ use Firebase\JWT\Key;
       }
       $userAuthData = $this->authModel->findOne($input['username']);
       if(sizeof($userAuthData) == 0){
-        $response['status_code_header'] = 'HTTP/1.1 400 success!';
+        $response['status_code_header'] = 'HTTP/1.1 400 bad request!';
         $response['body'] = json_encode([
         'message' => "Username/password does not match"
-        ]);      
+        ]);    
+        return $response;
       }
       $input_password = Encrypt::saltEncryption($input['password']);
       // Password compare
       if($input_password !== $userAuthData[0]['password']){
-          $response['status_code_header'] = 'HTTP/1.1 400 success!';
+          $response['status_code_header'] = 'HTTP/1.1 400 bad request!';
           $response['body'] = json_encode([
           'message' => "Username/password does not match"
           ]);
           return $response;
       }
-      if(Token::generate("USER_TOKEN",$userAuthData[0]['user_id'])){
-        Token::setTokenExpire();
-      }
 
-      $userInfo = $this->usersModel->findById($userAuthData[0]['user_id']);
+      $userInfo = $this->usersModel->findById($userAuthData[0]['user_id'],1);
 
       $iss = "localhost";
       $iat = time();
       $nbf = $iat + 10;
-      $eat = $iat + 30;
+      $eat = $iat + 21600;
       $aud = "myusers";
       $user_array_data = array(
       "id"=>$userInfo[0]['user_id'],
@@ -186,14 +196,23 @@ use Firebase\JWT\Key;
 
       $response['status_code_header'] = 'HTTP/1.1 200 OK';
       $response['body'] = json_encode([
-      'message' => "Welcome",
       'jwt' =>  $jwt,
       "user_info" => sizeof($userInfo) > 0 ? $userInfo[0] : null,
       "role" => sizeof($role) > 0 ? $role[0] : null
       ]);
       return $response;
   }
+  // Get all user by username
+  // Get a user by id 
+  function getUser($params)
+  {
 
+      $result = $this->usersModel->findOne($params);
+
+      $response['status_code_header'] = 'HTTP/1.1 200 OK';
+      $response['body'] = json_encode($result);
+      return $response;
+  }
   private function validateCredential($input)
   {
       if (empty($input['username'])) {
