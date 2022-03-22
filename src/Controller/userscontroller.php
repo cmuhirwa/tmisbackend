@@ -101,7 +101,7 @@
 
           $this->usersModel->delete($user_id,1,$decoded_data->data->id,0);
 
-          $this->authModel->delete($user_id,0);
+          // $this->authModel->delete($user_id,0);
 
           $response['status_code_header'] = 'HTTP/1.1 200 OK';
           $response['body'] = json_encode(["message"=>"Account Suspended!"]);
@@ -132,7 +132,7 @@
           }
           $this->usersModel->delete($user_id,1,$decoded_data->data->id,1);
 
-          $this->authModel->delete($user_id,1);
+          // $this->authModel->delete($user_id,1);
 
           $response['status_code_header'] = 'HTTP/1.1 200 OK';
           $response['body'] = json_encode(["message"=>"Account Activated!"]);

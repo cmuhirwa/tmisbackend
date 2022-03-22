@@ -13,8 +13,8 @@ class UsersModel {
       $statement = "
         INSERT 
           INTO users 
-            (user_id,first_name,last_name,phone,email,role_id,created_by)
-          VALUES (:user_id,:first_name,:last_name,:phone,:email,:role_id,:created_by);
+            (user_id,first_name,last_name,phone,email,role_id,password,created_by)
+          VALUES (:user_id,:first_name,:last_name,:phone,:email,:role_id,:password,:created_by);
         ";
         try {
           $statement = $this->db->prepare($statement);
@@ -25,6 +25,7 @@ class UsersModel {
               ':phone' => $data['phone'],
               ':email' => $data['email'],
               ':role_id' => $data['role_id'],
+              ':password' => $data['password'],
               ':created_by' => $data['created_by'],
           ));
           return $statement->rowCount();
@@ -92,7 +93,7 @@ class UsersModel {
           SELECT 
               *
           FROM
-              users WHERE Id = ? AND status = ? LIMIT 1
+              users WHERE user_id = ? AND status = ? LIMIT 1
       ";
 
       try {

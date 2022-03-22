@@ -5,7 +5,6 @@ use Src\Models\AuthModel;
 use Src\Models\UsersModel;
 use Src\Models\RolesModel;
 use Src\System\Errors;
-use Src\System\Token;
 use Src\System\Encrypt;
 use Src\System\UuidGenerator;
 use \Firebase\JWT\JWT;
@@ -51,11 +50,6 @@ use Firebase\JWT\Key;
               }
               break;
             case 'DELETE':
-              if($this->params['action'] == "suspend"){
-                $response = $this->createAccount();
-              }else{
-                $response = $this->login();
-              }
             break;
           default:
             $response = Errors::notFoundError("Route not found!");
@@ -87,18 +81,19 @@ use Firebase\JWT\Key;
     // Generate user id 
     $user_id = UuidGenerator::gUuid();
 
-    $authData['user_id'] = $user_id;
-    $authData['username'] = $data['phone'];
-    $authData['password'] = $default_password;
+    // $authData['user_id'] = $user_id;
+    // $authData['username'] = $data['phone'];
+    // $authData['password'] = $default_password;
 
+    $data['password'] = $default_password;
     $data['user_id'] = $user_id;
     $data['created_by'] = $user_id;
 
-    $result = $this->usersModel->insert($data);
+    $this->usersModel->insert($data);
 
-    if($result == 1){
-      $this->authModel->insert($authData);
-    }
+    // if($result == 1){
+    //   $this->authModel->insert($authData);
+    // }
 
     $response['status_code_header'] = 'HTTP/1.1 201 Created';
     $response['body'] = json_encode([
@@ -150,7 +145,7 @@ use Firebase\JWT\Key;
       if(!self::validateCredential($input)){
           return Errors::unprocessableEntityResponse();
       }
-      $userAuthData = $this->authModel->findOne($input['username']);
+      $userAuthData = $this->usersModel->findByPhone($input['username']);
       if(sizeof($userAuthData) == 0){
         $response['status_code_header'] = 'HTTP/1.1 400 bad request!';
         $response['body'] = json_encode([
