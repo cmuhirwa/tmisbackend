@@ -9,13 +9,13 @@ class AuthModel {
     {
       $this->db = $db;
     }
-    public function insert(){
+    public function insert($data){
       $statement = "
         INSERT 
           INTO auth 
-            (user_id,username,password,role_id)
+            (user_id,username,password)
           VALUES 
-            (:user_id,:username,:password,:role_id);
+            (:user_id,:username,:password);
         ";
         try {
           $statement = $this->db->prepare($statement);
@@ -23,7 +23,6 @@ class AuthModel {
               ':user_id' => $data['user_id'],
               ':username' => $data['username'],
               ':password' => $data['password'],
-              ':role_id' => $data['role_id']
           ));
           return $statement->rowCount();
         } catch (\PDOException $e) {
@@ -48,5 +47,28 @@ class AuthModel {
           exit($e->getMessage());
       }
     }
+
+  public function delete($user_id,$status)
+  {
+      $sql = "
+          UPDATE 
+              auth
+          SET 
+              status = :status
+          WHERE user_id = :user_id;
+      ";
+
+      try {
+          $statement = $this->db->prepare($sql);
+          $statement->execute(array(
+            ':user_id' => $user_id,
+            ':status' =>$status
+          ));
+
+          return $statement->rowCount();
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }    
+  }
 }
 ?>

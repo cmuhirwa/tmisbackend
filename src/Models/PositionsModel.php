@@ -1,7 +1,7 @@
 <?php
 namespace Src\Models;
 
-class UsersModel {
+class PositionsModel {
 
     private $db = null;
 
@@ -12,20 +12,15 @@ class UsersModel {
     public function insert($data){
       $statement = "
         INSERT 
-          INTO users 
-            (user_id,first_name,last_name,phone,email,role_id,created_by)
-          VALUES (:user_id,:first_name,:last_name,:phone,:email,:role_id,:created_by);
+          INTO positions 
+            (post_code,post_name,)
+          VALUES (:post_code,:post_name);
         ";
         try {
           $statement = $this->db->prepare($statement);
           $statement->execute(array(
-              ':user_id' => $data['user_id'],
-              ':first_name' => $data['first_name'],
-              ':last_name' => $data['last_name'],
-              ':phone' => $data['phone'],
-              ':email' => $data['email'],
-              ':role_id' => $data['role_id'],
-              ':created_by' => $data['created_by'],
+              ':post_code' => $data['post_code'],
+              ':post_name' => $data['post_name']
           ));
           return $statement->rowCount();
         } catch (\PDOException $e) {
@@ -38,7 +33,7 @@ class UsersModel {
           SELECT 
               *
           FROM
-              users WHERE status = 1;
+              positions WHERE archive = 1;
       ";
 
       try {
@@ -50,18 +45,18 @@ class UsersModel {
       }
     }
 
-    public function findById($user_id,$status)
+    public function findById($position_id,$archive)
     {
       $statement = "
           SELECT 
               *
           FROM
-              users WHERE user_id = ? AND status = ? LIMIT 1
+              positions WHERE position_id = ? AND archive = ? LIMIT 1
       ";
 
       try {
         $statement = $this->db->prepare($statement);
-        $statement->execute(array($user_id,$status));
+        $statement->execute(array($position_id,$archive));
         $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
         return $result;
       } catch (\PDOException $e) {
@@ -74,7 +69,7 @@ class UsersModel {
           SELECT 
               *
           FROM
-              users WHERE phone = ? AND status = ? LIMIT 1
+              positions WHERE phone = ? AND archive = ? LIMIT 1
       ";
 
       try {
@@ -86,18 +81,18 @@ class UsersModel {
           exit($e->getMessage());
       }
     }
-    public function findOne($user_id)
+    public function findOne($position_id)
     {
       $statement = "
           SELECT 
               *
           FROM
-              users WHERE Id = ? AND status = ? LIMIT 1
+              positions WHERE position_id = ? AND archive = ? LIMIT 1
       ";
 
       try {
         $statement = $this->db->prepare($statement);
-        $statement->execute(array($user_id,1));
+        $statement->execute(array($position_id,1));
         $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
         if(sizeof($result) == 0){
           return null;
@@ -107,24 +102,24 @@ class UsersModel {
           exit($e->getMessage());
       }
     }
-    public function delete($user_id,$archive,$archived_by,$status)
+    public function delete($position_id,$archived_by,$archive)
     {
         $sql = "
             UPDATE 
-                users
+                positions
             SET 
-                status = :status,archive=:archive,archived_by=:archived_by,archived_bate=:archived_bate
-            WHERE user_id = :user_id;
+                archive = :archive,archive=:archive,archived_by=:archived_by,archived_bate=:archived_bate
+            WHERE position_id = :position_id;
         ";
 
         try {
             $statement = $this->db->prepare($sql);
             $statement->execute(array(
-              ':user_id' => $user_id,
+              ':position_id' => $position_id,
               ':archive' => $archive,
               ':archived_by' => $archived_by,
               ':archived_bate' => date("Y-m-d H:i:s"),
-              ':status' =>$status
+              ':archive' =>$archive
             ));
 
             return $statement->rowCount();

@@ -14,12 +14,13 @@ $route = new MainRoutes();
 
 //route address and home.php file location
 
-// Users routes
+// Users routes 
 $route->router("/user", "src/Controller/userscontroller.php");
-$route->router("/user/login", "src/Controller/authcontroller.php");
 $route->router("/user/{id}","src/Controller/userscontroller.php");
-
-// Settings routes
+$route->router("/user/account/{action}", "src/Controller/authcontroller.php");
+$route->router("/user/account/{action}/{user_id}", "src/Controller/userscontroller.php");
+$route->router("/user/current/info", "src/Controller/authcontroller.php");
+// Plans routes
 $route->router("/plans", "src/Controller/planController.php");
 $route->router("/plan/{id}", "src/Controller/planController.php");
 
