@@ -33,11 +33,15 @@
                 $response = $this->getUsers();
               }
               break;
-            case 'DELETE':
+            case 'PATCH':
               if($this->params['action'] == "suspend"){
                 $response = $this->suspendUser($this->params['user_id']);
-              }else{
+              }elseif($this->params['action'] == "activate"){
                 $response = $this->activateUser($this->params['user_id']);
+              }elseif($this->params['action'] == "update"){
+                $response = $this->updateUserInfo();
+              }else{
+                $response = Errors::notFoundError("Route not found!");
               }
               break;
             default:
@@ -57,6 +61,9 @@
       $response['status_code_header'] = 'HTTP/1.1 200 OK';
       $response['body'] = json_encode($result);
       return $response;
+    }
+    function updateUserInfo(){
+      
     }
     // Get all users
     function getUsers()
@@ -84,12 +91,14 @@
         $data = new \stdClass();
 
         $all_headers = getallheaders();
+
         $data->jwt = $all_headers['Authorization'];
 
         // Decoding jwt
         if(empty($data->jwt)){
           return Errors::notAuthorized();
         }
+
         try {
           $secret_key = "owt125";
           $decoded_data = JWT::decode($data->jwt, new Key($secret_key,'HS512'));
@@ -99,9 +108,7 @@
               return Errors::notFoundError("User not found!");
           }
 
-          $this->usersModel->delete($user_id,1,$decoded_data->data->id,0);
-
-          // $this->authModel->delete($user_id,0);
+          $this->usersModel->changeStatus($user_id,$decoded_data->data->id,0);
 
           $response['status_code_header'] = 'HTTP/1.1 200 OK';
           $response['body'] = json_encode(["message"=>"Account Suspended!"]);
@@ -130,9 +137,7 @@
           if (sizeof($user) == 0) {
               return Errors::notFoundError("User not found!");
           }
-          $this->usersModel->delete($user_id,1,$decoded_data->data->id,1);
-
-          // $this->authModel->delete($user_id,1);
+          $this->usersModel->changeStatus($user_id,$decoded_data->data->id,1);
 
           $response['status_code_header'] = 'HTTP/1.1 200 OK';
           $response['body'] = json_encode(["message"=>"Account Activated!"]);

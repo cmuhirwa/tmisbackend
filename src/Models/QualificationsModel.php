@@ -15,7 +15,7 @@ class QualificationsModel {
           SELECT 
               *
           FROM
-            qualifications WHERE archive = 0;
+            qualifications;
       ";
 
       try {
@@ -27,18 +27,18 @@ class QualificationsModel {
       }
     }
 
-    public function findById($qualification_id,$archive)
+    public function findById($qualification_id)
     {
       $statement = "
           SELECT 
               *
           FROM
-            qualifications WHERE qualification_id = ? AND archive = ? LIMIT 1
+            qualifications WHERE qualification_id = ? LIMIT 1
       ";
 
       try {
         $statement = $this->db->prepare($statement);
-        $statement->execute(array($qualification_id,$archive));
+        $statement->execute(array($qualification_id));
         $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
         return $result;
       } catch (\PDOException $e) {
