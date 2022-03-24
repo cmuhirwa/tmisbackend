@@ -1,7 +1,8 @@
 <?php
-  namespace Src\Controller;
+    namespace Src\Controller;
 
-  use Src\Models\PlanModel;
+    use Src\Models\PlanModel;
+    use Src\System\Errors;
 
     class CalendarController {
     private $db;
@@ -31,7 +32,7 @@
               $response = $this->addPlan();
               break;
             default:
-              $response = Errors::notFoundError();
+              $response = Errors::notFoundError("Route not found!");
             break;
         }
         header($response['status_code_header']);

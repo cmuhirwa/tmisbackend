@@ -70,7 +70,7 @@ use Firebase\JWT\Key;
     }
     
     // Check if user is registered
-    $user = $this->usersModel->findByPhone($data['phone']);
+    $user = $this->usersModel->findByUsername($data['username']);
     if(sizeof($user) > 0) {
         return Errors::ExistError("Phone is already exist");
     }
@@ -81,19 +81,11 @@ use Firebase\JWT\Key;
     // Generate user id 
     $user_id = UuidGenerator::gUuid();
 
-    // $authData['user_id'] = $user_id;
-    // $authData['username'] = $data['phone'];
-    // $authData['password'] = $default_password;
-
     $data['password'] = $default_password;
     $data['user_id'] = $user_id;
     $data['created_by'] = $user_id;
 
     $this->usersModel->insert($data);
-
-    // if($result == 1){
-    //   $this->authModel->insert($authData);
-    // }
 
     $response['status_code_header'] = 'HTTP/1.1 201 Created';
     $response['body'] = json_encode([
@@ -145,7 +137,7 @@ use Firebase\JWT\Key;
       if(!self::validateCredential($input)){
           return Errors::unprocessableEntityResponse();
       }
-      $userAuthData = $this->usersModel->findByPhone($input['username']);
+      $userAuthData = $this->usersModel->findByUsername($input['username']);
       if(sizeof($userAuthData) == 0){
         $response['status_code_header'] = 'HTTP/1.1 400 bad request!';
         $response['body'] = json_encode([
@@ -172,7 +164,7 @@ use Firebase\JWT\Key;
       $aud = "myusers";
       $user_array_data = array(
       "id"=>$userInfo[0]['user_id'],
-      "phone"=>$userInfo[0]['phone'],
+      "username"=>$userInfo[0]['username'],
       "email"=>$userInfo[0]['email'],
       );
 
@@ -228,13 +220,16 @@ use Firebase\JWT\Key;
       if (empty($input['last_name'])) {
           return false;
       }
-      if (empty($input['phone'])) {
+      if (empty($input['phone_numbers'])) {
           return false;
       }
       if (empty($input['email'])) {
           return false;
       }
       if (empty($input['role_id'])) {
+          return false;
+      }
+       if (empty($input['username'])) {
           return false;
       }
       return true;

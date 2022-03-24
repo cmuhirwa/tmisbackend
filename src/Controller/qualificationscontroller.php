@@ -2,11 +2,10 @@
 namespace Src\Models;
 use Src\Models\QualificationsModel;
 use Src\System\Errors;
-use Src\System\Encrypt;
-use \Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+use Src\System\AuthValidation;
 
-class AuthController {
+
+class QualificationsController {
   private $db;
   private $qualificationsModel;
   private $request_method;
@@ -42,60 +41,55 @@ class AuthController {
   // Get all users
   function getAllQualifications()
   {
-    $data = new \stdClass();
-    $rlt = new \stdClass();
+    $jwt_data = new \stdClass();
 
     $all_headers = getallheaders();
     if(isset($all_headers['Authorization'])){
-      $data->jwt = $all_headers['Authorization'];
+      $jwt_data->jwt = $all_headers['Authorization'];
     }
     // Decoding jwt
-    if(empty($data->jwt)){
+    if(empty($jwt_data->jwt)){
       return Errors::notAuthorized();
     }
-    try {
-      $secret_key = "owt125";
-      $decoded_data = JWT::decode($data->jwt, new Key($secret_key,'HS512'));
-
+      if(!AuthValidation::isValidJwt($jwt_data)){
+        return Errors::notAuthorized();
+      }
       $result = $this->qualificationsModel->findAll();
 
       $response['status_code_header'] = 'HTTP/1.1 200 OK';
       $response['body'] = json_encode($result);
       return $response;
-      } catch (\Throwable $e) {
-        return Errors::notAuthorized();
-      }
-
   }
   // Get one user
   function getOneQualification($qualification_id)
   {
-    $data = new \stdClass();
-    $rlt = new \stdClass();
+    $jwt_data = new \stdClass();
 
     $all_headers = getallheaders();
     if(isset($all_headers['Authorization'])){
-      $data->jwt = $all_headers['Authorization'];
+      $jwt_data->jwt = $all_headers['Authorization'];
     }
     // Decoding jwt
-    if(empty($data->jwt)){
+    if(empty($jwt_data->jwt)){
       return Errors::notAuthorized();
     }
-    try {
-      $secret_key = "owt125";
-      $decoded_data = JWT::decode($data->jwt, new Key($secret_key,'HS512'));
-
-      $result = $this->qualificationsModel->findById($qualification_id,0);
-
-      $response['status_code_header'] = 'HTTP/1.1 200 OK';
-      $response['body'] = json_encode($result);
-      return $response;
-      } catch (\Throwable $e) {
+      
+      if(!AuthValidation::isValidJwt($jwt_data)){
         return Errors::notAuthorized();
       }
 
+      $result = $this->qualificationsModel->findById($qualification_id,0);
+      if(sizeof($result) > 0){
+      $result = $result[0];
+      }else{
+          $result = null;
+      }
+      $response['status_code_header'] = 'HTTP/1.1 200 OK';
+      $response['body'] = json_encode($result);
+      return $response;
+
   }
 }
-  $controller = new AuthController($this->db, $request_method,$params);
+  $controller = new QualificationsController($this->db, $request_method,$params);
   $controller->processRequest();
 ?>

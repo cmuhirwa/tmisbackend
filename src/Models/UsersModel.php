@@ -13,8 +13,8 @@ class UsersModel {
       $statement = "
         INSERT 
           INTO users 
-            (user_id,first_name,last_name,phone,email,role_id,password,created_by)
-          VALUES (:user_id,:first_name,:last_name,:phone,:email,:role_id,:password,:created_by);
+            (user_id,first_name,last_name,phone_numbers,email,username,password,created_by)
+          VALUES (:user_id,:first_name,:last_name,:phone_numbers,:email,:username,:password,:created_by);
         ";
         try {
           $statement = $this->db->prepare($statement);
@@ -22,9 +22,9 @@ class UsersModel {
               ':user_id' => $data['user_id'],
               ':first_name' => $data['first_name'],
               ':last_name' => $data['last_name'],
-              ':phone' => $data['phone'],
+              ':phone_numbers' => $data['phone_numbers'],
               ':email' => $data['email'],
-              ':role_id' => $data['role_id'],
+              ':username' => $data['username'],
               ':password' => $data['password'],
               ':created_by' => $data['created_by'],
           ));
@@ -32,6 +32,58 @@ class UsersModel {
         } catch (\PDOException $e) {
           exit($e->getMessage());
         }
+    }
+    public function updateUser($data){
+      $sql = "
+          UPDATE 
+              users
+          SET 
+          first_name=:first_name,last_name=:last_name,phone_numbers=:phone_numbers,email=:email,updated_by=:updated_by,updated_date=:updated_date
+          WHERE user_id = :user_id AND status =:status;
+      ";
+      try {
+
+          $statement = $this->db->prepare($sql);
+          $statement->execute(array(
+            ':first_name' => $data['first_name'],
+            ':first_name' => $data['first_name'],
+            ':last_name' => $data['last_name'],
+            ':phone_numbers' => $data['phone_numbers'],
+            ':email' => $data['email'],
+            ':user_id' => $data['user_id'],
+            ':updated_by' => $data['updated_by'],
+            ':updated_date' => date("Y-m-d H:i:s"),
+            ':status' =>1
+          ));
+
+          return $statement->rowCount();
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }
+    }
+    public function changePassword($data){
+      $sql = "
+          UPDATE 
+              users
+          SET 
+          password=:password,updated_by=:updated_by,updated_date=:updated_date
+          WHERE user_id=:user_id AND status=:status;
+      ";
+      try {
+        
+          $statement = $this->db->prepare($sql);
+          $statement->execute(array(
+            ':password' => $data['password'],
+            ':user_id' => $data['user_id'],
+            ':updated_by' => $data['updated_by'],
+            ':updated_date' => date("Y-m-d H:i:s"),
+            ':status' =>1
+          ));
+
+          return $statement->rowCount();
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }
     }
     public function findAll()
     {
@@ -69,18 +121,18 @@ class UsersModel {
           exit($e->getMessage());
       }
     }
-    public function findByPhone($phone)
+    public function findByUsername($username)
     {
       $statement = "
           SELECT 
               *
           FROM
-              users WHERE phone = ? AND status = ? LIMIT 1
+              users WHERE username = ? AND status = ? LIMIT 1
       ";
 
       try {
         $statement = $this->db->prepare($statement);
-        $statement->execute(array($phone,1));
+        $statement->execute(array($username,1));
         $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
         return $result;
       } catch (\PDOException $e) {
@@ -108,13 +160,13 @@ class UsersModel {
           exit($e->getMessage());
       }
     }
-    public function delete($user_id,$archive,$archived_by,$status)
+    public function changeStatus($user_id,$updated_by,$status)
     {
         $sql = "
             UPDATE 
                 users
             SET 
-                status = :status,archive=:archive,archived_by=:archived_by,archived_bate=:archived_bate
+                status=:status,updated_by=:updated_by,updated_date=:updated_date
             WHERE user_id = :user_id;
         ";
 
@@ -122,9 +174,8 @@ class UsersModel {
             $statement = $this->db->prepare($sql);
             $statement->execute(array(
               ':user_id' => $user_id,
-              ':archive' => $archive,
-              ':archived_by' => $archived_by,
-              ':archived_bate' => date("Y-m-d H:i:s"),
+              ':updated_by' => $updated_by,
+              ':updated_date' => date("Y-m-d H:i:s"),
               ':status' =>$status
             ));
 
