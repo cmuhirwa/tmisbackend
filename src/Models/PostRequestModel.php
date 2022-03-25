@@ -13,7 +13,13 @@ class PostRequestModel {
     public function getSchoolRequests($academicId, $schoolId)
     {
       $statement = " 
-        SELECT  * FROM post_request WHERE academic_calendar_id = ? AND school_code = ? ";
+      SELECT q.qualification_name, p.position_name, pr.post_request_id, pr.academic_calendar_id, pr.school_code, pr.position_code, pr.qualification_id, pr.head_teacher_id, pr.head_teacher_post_request, pr.head_teacher_reason_id, pr.dde_id_request, pr.dde_post_request, pr.dde_id_distribution, pr.dde_post_distribution, pr.dde_distribution_comment, pr.district_code, pr.created_by
+      FROM post_request pr
+      INNER JOIN qualifications q ON pr.qualification_id = q.qualification_id
+      INNER JOIN positions p ON pr.position_code = p.position_code
+      
+      
+      WHERE pr.academic_calendar_id = ? AND pr.school_code = ?  ";
 
       try {
           $statement = $this->db->prepare($statement);
