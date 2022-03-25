@@ -56,6 +56,29 @@ $route->router("/districtdistribution", "src/Controller/posts.php");
 // Basic info routes
 $route->router("/basicinfos/{action}", "src/Controller/basicinfocontroller.php");
 
+
+
+
+        //---Clement Routes---//
+
+// Plans routes
+$route->router("/plans", "src/Controller/planController.php");
+$route->router("/plan/{id}", "src/Controller/planController.php");
+
+// Positions routes
+$route->router("/positions", "src/Controller/positionController.php");
+$route->router("/position/{id}", "src/Controller/positionController.php");
+
+// Post Request Reasons
+$route->router("/postRequestReasons", "src/Controller/postRequestReasonsController.php");
+
+// Post request
+$route->router("/postrequests/{action}/{academicid}/{id}", "src/Controller/postRequestController.php");
+$route->router("/postrequest/request/{action}", "src/Controller/postRequestController.php");
+
+// Qualifications
+$route->router("/qualifications", "src/Controller/qualificationController.php");
+
 //write it at the last
 //arg is 404 file location
 $route->notFound("404.php");

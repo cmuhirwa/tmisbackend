@@ -1,0 +1,129 @@
+<?php
+  namespace Src\Controller;
+
+  use Src\System\Errors;
+
+  use Src\Models\PlanModel;
+  use \Firebase\JWT\JWT;
+  use Firebase\JWT\Key;
+
+    class CalendarController {
+    private $db;
+    private $planModel;
+    private $request_method;
+    private $params;
+
+    public function __construct($db,$request_method,$params)
+    {
+      $this->db = $db;
+      $this->request_method = $request_method;
+      $this->params = $params;
+      $this->planModel = new PlanModel($db);
+    }
+
+    function processRequest()
+    {
+        switch ($this->request_method) {
+            case 'GET':
+              if(sizeof($this->params) == 1){
+                $response = $this->getCalendar($this->params['id']);
+              }else{
+                $response = $this->getCalendars();
+              }
+              break;
+            case 'POST':
+              $response = $this->addPlan();
+              break;
+            case 'DELETE':
+              if(sizeof($this->params) == 1){
+                $response = $this->deletePlan($this->params['id']);
+              }
+            default:
+              $response = Errors::notFoundError('plan not found');
+            break;
+        }
+        header($response['status_code_header']);
+        if ($response['body']) {
+            echo $response['body'];
+        }
+    }
+
+    // Get all calendars
+    function getCalendars()
+    {
+        // $result = ["id"=> $params["id"]]; 
+        $result = $this->planModel->findAll();
+
+        $response['status_code_header'] = 'HTTP/1.1 200 OK';
+        $response['body'] = json_encode($result);
+        return $response;
+    }
+
+    // Get a calendar by id 
+    function getCalendar($params)
+    {
+        $result = $this->planModel->findOne($params);
+
+        $response['status_code_header'] = 'HTTP/1.1 200 OK';
+        $response['body'] = json_encode($result);
+        return $response;
+    }
+
+    // Add a plan
+    function addPlan(){
+      $input = (array) json_decode(file_get_contents('php://input'), TRUE);
+      // Validate input if not empty
+      if(!self::validatePlanInfo($input)){
+        return Errors::unprocessableEntityResponse();
+      }
+      
+      $result = $this->planModel->insert($input);
+      //$userAuthData = $this->authModel->findOne($input['username']);
+      $response['status_code_header'] = 'HTTP/1.1 200 OK';
+      $response['body'] = json_encode($input);
+      return $response;
+    }
+
+    // Delete a plan
+    function deletePlan($planId){
+      $plan = $this->planModel->findOne($planId);
+      if (sizeof($plan) == 0) {
+          return Errors::notFoundError("Plan not found!");
+      }
+
+      $this->planModel->delete($planId,1);
+
+      $response['status_code_header'] = 'HTTP/1.1 200 OK';
+      $response['body'] = json_encode(["message"=>"Account Suspended!"]);
+      return $response;
+    }
+
+    private function validatePlanInfo($input)
+    {
+        if (empty($input['plan_name'])) {
+            return false;
+        }
+        if (empty($input['plan_description'])) {
+            return false;
+        }
+        if (empty($input['plan_type'])) {
+          return false;
+        }
+        if (empty($input['academic_year_code'])) {
+            return false;
+        }
+        if (empty($input['start'])) {
+          return false;
+        }
+        if (empty($input['end'])) {
+            return false;
+        }
+        return true;
+        if (empty($input['createdB_by'])) {
+          return false;
+        }
+        return true;
+    }
+  }
+    $controller = new CalendarController($this->db, $request_method,$params);
+    $controller->processRequest();
