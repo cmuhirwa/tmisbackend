@@ -61,9 +61,9 @@ $route->router("/basicinfos/{action}", "src/Controller/basicinfocontroller.php")
 
         //---Clement Routes---//
 
-// Plans routes
-$route->router("/plans", "src/Controller/planController.php");
-$route->router("/plan/{id}", "src/Controller/planController.php");
+// AcademicCalendar routes
+$route->router("/academiccalendars", "src/Controller/planController.php");
+$route->router("/academiccalendar/{id}", "src/Controller/planController.php");
 
 // Positions routes
 $route->router("/positions", "src/Controller/positionController.php");

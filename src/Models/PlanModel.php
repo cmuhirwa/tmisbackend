@@ -28,7 +28,7 @@ class PlanModel {
     {
       $statement = "
         SELECT * FROM academic_calendar
-        WHERE academic_year_id = ? AND archive = ?
+        WHERE academic_calendar_id = ? AND archive = ?
       ";
 
       try {
@@ -48,22 +48,32 @@ class PlanModel {
     public function insert($data){
       $statement = "
         INSERT 
-          INTO plan 
-            (plan_name, plan_description, plan_type, 
-            academic_year_code, start, end, createdB_by)
+          INTO academic_calendar 
+            (academic_year_name, academic_year_description, academic_year_start, 
+            academic_year_end, post_request_start, post_request_end, transfer_request_start,transfer_request_end, internal_transfer_assessment_start, internal_transfer_assessment_end, external_transfer_assessment_start, external_transfer_assessment_end, teacher_recruitment_start, teacher_recruitment_end, createdB_by)
           VALUES 
-            (:plan_name, :plan_description, :plan_type, 
-            :academic_year_code, :start, :end, :createdB_by);
+            (:academic_year_name, :academic_year_description, :academic_year_start, 
+            :academic_year_end, :post_request_start, :post_request_end, :transfer_request_start,
+            :transfer_request_end, :internal_transfer_assessment_start, :internal_transfer_assessment_end, :external_transfer_assessment_start, :external_transfer_assessment_end, :teacher_recruitment_start, :teacher_recruitment_end, :createdB_by
+          );
         ";
         try {
           $statement = $this->db->prepare($statement);
           $statement->execute(array(
-              ':plan_name' => $data['plan_name'],
-              ':plan_description' => $data['plan_description'],
-              ':plan_type' => $data['plan_type'],
-              ':academic_year_code' => $data['academic_year_code'],
-              ':start' => $data['start'],
-              ':end' => $data['end'],
+              ':academic_year_name' => $data['academic_year_name'],
+              ':academic_year_description' => $data['academic_year_description'],
+              ':academic_year_start' => $data['academic_year_start'],
+              ':academic_year_end' => $data['academic_year_end'],
+              ':post_request_start' => $data['post_request_start'],
+              ':post_request_end' => $data['post_request_end'],
+              ':transfer_request_start' => $data['transfer_request_start'],
+              ':transfer_request_end' => $data['transfer_request_end'],
+              ':internal_transfer_assessment_start' => $data['internal_transfer_assessment_start'],
+              ':internal_transfer_assessment_end' => $data['internal_transfer_assessment_end'],
+              ':external_transfer_assessment_start' => $data['external_transfer_assessment_start'],
+              ':external_transfer_assessment_end' => $data['external_transfer_assessment_end'],
+              ':teacher_recruitment_start' => $data['teacher_recruitment_start'],
+              ':teacher_recruitment_end' => $data['teacher_recruitment_end'],
               ':createdB_by' => $data['createdB_by'],
           ));
           return $statement->rowCount();
@@ -76,10 +86,10 @@ class PlanModel {
     {
       $sql = "
             UPDATE 
-                plan
+              academic_calendar
             SET 
                 archive=:archive,archived_by=:archived_by,archived_date=:archived_date
-            WHERE plan_id=:plan_id;
+            WHERE academic_calendar_id=:plan_id;
         ";
 
         try {

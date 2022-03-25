@@ -98,27 +98,54 @@
       return $response;
     }
 
+
+
     private function validatePlanInfo($input)
     {
-        if (empty($input['plan_name'])) {
+
+        if (empty($input['academic_year_name'])) {
             return false;
         }
-        if (empty($input['plan_description'])) {
+        if (empty($input['academic_year_description'])) {
             return false;
         }
-        if (empty($input['plan_type'])) {
+        if (empty($input['academic_year_start'])) {
           return false;
         }
-        if (empty($input['academic_year_code'])) {
-            return false;
-        }
-        if (empty($input['start'])) {
+        if (empty($input['academic_year_end'])) {
           return false;
         }
-        if (empty($input['end'])) {
+        
+        if (empty($input['post_request_start'])) {
+          return false;
+        }
+        if (empty($input['post_request_end'])) {
             return false;
         }
-        return true;
+        if (empty($input['transfer_request_start'])) {
+          return false;
+        }
+        if (empty($input['transfer_request_end'])) {
+            return false;
+        }
+        if (empty($input['internal_transfer_assessment_start'])) {
+          return false;
+        }
+        if (empty($input['internal_transfer_assessment_end'])) {
+          return false;
+        }
+        if (empty($input['external_transfer_assessment_start'])) {
+          return false;
+        }
+        if (empty($input['external_transfer_assessment_end'])) {
+            return false;
+        }
+        if (empty($input['teacher_recruitment_start'])) {
+          return false;
+        }
+        if (empty($input['teacher_recruitment_end'])) {
+          return false;
+        }
         if (empty($input['createdB_by'])) {
           return false;
         }
