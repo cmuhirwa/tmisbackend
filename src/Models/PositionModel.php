@@ -13,7 +13,9 @@ class PositionModel {
     public function findAll()
     {
       $statement = " 
-        SELECT  position_id, position_name FROM positions WHERE archive = 1 ";
+      SELECT p.position_id, p.position_name, sl.school_level_name
+      FROM positions p 
+      INNER JOIN school_levels sl ON p.school_level_code = sl.school_level_code ";
 
       try {
           $statement = $this->db->query($statement);
