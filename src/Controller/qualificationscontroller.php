@@ -1,5 +1,5 @@
 <?php
-namespace Src\Models;
+namespace Src\Controller;
 use Src\Models\QualificationsModel;
 use Src\System\Errors;
 use Src\System\AuthValidation;
