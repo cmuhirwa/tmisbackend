@@ -18,7 +18,8 @@ class PositionModel {
       try {
           $statement = $this->db->query($statement);
           $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-         // $result = array_push ($result['qualification'] = 'A0');
+          $result[0]['qualification'] = 'A0';
+          $result[0]['qualification_id'] = '1';
           return $result;
       } catch (\PDOException $e) {
           exit($e->getMessage());
@@ -28,7 +29,7 @@ class PositionModel {
     public function findOne($position_id)
     {
       $statement = "
-        SELECT position_code, position_name  FROM positions
+        SELECT position_code, position_name FROM positions
         WHERE position_id = 1
       ";
       try {
