@@ -188,6 +188,7 @@ use Firebase\JWT\Key;
       "user_info" => sizeof($userInfo) > 0 ? $userInfo[0] : null,
       "role" => sizeof($role) > 0 ? $role[0] : null
       ]);
+      
       return $response;
   }
   // Get all user by username

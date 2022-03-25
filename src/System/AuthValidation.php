@@ -1,6 +1,5 @@
 <?php
 namespace Src\System;
-use Src\System\Errors;
 use \Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 

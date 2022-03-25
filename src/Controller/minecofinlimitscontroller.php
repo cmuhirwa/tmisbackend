@@ -59,11 +59,11 @@ use Src\System\AuthValidation;
         }
         // Decoding jwt
         if(empty($jwt_data->jwt)){
-        return Errors::notAuthorized();
+            return Errors::notAuthorized();
         }
 
         if(!AuthValidation::isValidJwt($jwt_data)){
-        return Errors::notAuthorized();
+            return Errors::notAuthorized();
         }
         $user_id = AuthValidation::decodedData($jwt_data)->data->id;
 
@@ -76,7 +76,7 @@ use Src\System\AuthValidation;
 
                $is_exist = $this->minecofinLimitsModel->findLimitByAcademicYearQualification($value['academic_year_id'],$value['qualification_id']);
                 if(sizeof($is_exist) > 0){
-                    array_push($exists,$value);
+                    $this->minecofinLimitsModel->update($value,$user_id);
                 }else{
                     $this->minecofinLimitsModel->insert($value,$user_id);
                 }
@@ -84,7 +84,7 @@ use Src\System\AuthValidation;
         }
 
         $response['status_code_header'] = 'HTTP/1.1 201 Created';
-        $response['body'] = json_encode(["message"=>"Created","not_updated"=>$exists]);
+        $response['body'] = json_encode(["message"=>"Created"]);
         return $response;
     }
     function updateAllocatedPost(){
@@ -99,7 +99,7 @@ use Src\System\AuthValidation;
         }
         // Decoding jwt
         if(empty($jwt_data->jwt)){
-        return Errors::notAuthorized();
+            return Errors::notAuthorized();
         }
 
         if(!AuthValidation::isValidJwt($jwt_data)){
@@ -157,11 +157,7 @@ use Src\System\AuthValidation;
               return Errors::notAuthorized();
             }
             $result = $this->minecofinLimitsModel->findAcademicYearLimits($academic_year_id);
-            if(sizeof($result) > 0){
-              $result = $result[0];
-            }else{
-                $result = null;
-            }
+     
 
             $response['status_code_header'] = 'HTTP/1.1 200 success';
             $response['body'] = json_encode($result);
@@ -170,3 +166,4 @@ use Src\System\AuthValidation;
 }
 $controller = new MinecofinLimitsController($this->db, $request_method,$params);
 $controller->processRequest();
+?>
