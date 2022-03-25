@@ -1,7 +1,7 @@
 <?php
 namespace Src\Models;
 
-class RolesModel {
+class SchoolLocationsModel {
 
     private $db = null;
 
@@ -9,13 +9,12 @@ class RolesModel {
     {
       $this->db = $db;
     }
-    public function findAll()
+    public function districts()
     {
       $statement = "
-          SELECT 
-              *
-          FROM
-              roles WHERE status = ?
+        SELECT DISTINCT 
+            district_code, district_name 
+        FROM schoollocation ORDER BY district_code, district_name;
       ";
       try {
         $statement = $this->db->prepare($statement);
@@ -26,18 +25,18 @@ class RolesModel {
           exit($e->getMessage());
       }
     }
-  public function findById($role_id)
+  public function findDistrictByCode($district_code)
   {
     $statement = "
         SELECT 
             *
         FROM
-            roles WHERE role_id = ? AND status = ?
+            schoollocation WHERE district_code = ?
     ";
 
     try {
       $statement = $this->db->prepare($statement);
-      $statement->execute(array($role_id,1));
+      $statement->execute(array($district_code));
       $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
       return $result;
     } catch (\PDOException $e) {

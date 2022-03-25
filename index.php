@@ -1,9 +1,16 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header('Access-Control-Allow-Methods: *');
-header("Access-Control-Max-Age: 4600");
-header('Access-Control-Allow-Headers: *');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: POST, GET, DELETE, PUT, PATCH, OPTIONS');
+    header('Access-Control-Allow-Headers: token, Content-Type,Authorization');
+    header('Access-Control-Max-Age: 1728000');
+    header('Content-Length: 0');
+    header('Content-Type: text/plain');
+    die();
+}
+
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
 
 require "bootstrap.php";
 
@@ -20,9 +27,34 @@ $route->router("/user/{id}","src/Controller/userscontroller.php");
 $route->router("/user/account/{action}", "src/Controller/authcontroller.php");
 $route->router("/user/account/{action}/{user_id}", "src/Controller/userscontroller.php");
 $route->router("/user/current/info", "src/Controller/authcontroller.php");
-// Plans routes
-$route->router("/plans", "src/Controller/planController.php");
-$route->router("/plan/{id}", "src/Controller/planController.php");
+
+// Roles routes
+$route->router("/role", "src/Controller/rolescontroller.php");
+$route->router("/role/{id}", "src/Controller/rolescontroller.php");
+
+// District routes
+$route->router("/district", "src/Controller/districtscontroller.php");
+$route->router("/district/{district_code}", "src/Controller/districtscontroller.php");
+
+// Province routes
+$route->router("/qualification", "src/Controller/qualificationscontroller.php");
+$route->router("/qualification/{qualification_id}", "src/Controller/qualificationscontroller.php");
+
+// Reb limit set to qualification routes
+$route->router("/minicofinlimit", "src/Controller/minecofinlimitscontroller.php");
+$route->router("/minicofinlimit/academic/{academic_year_id}", "src/Controller/minecofinlimitscontroller.php");
+$route->router("/minicofinlimit", "src/Controller/minecofinlimitscontroller.php");
+
+// Reb limit set to district routes
+$route->router("/rebdistribution", "src/Controller/rebdistributionsmodel.php");
+$route->router("/rebdistribution/{action}/{academic_year_id}", "src/Controller/rebdistributionsmodel.php");
+
+// District distribution post to school
+$route->router("/districtdistribution", "src/Controller/posts.php");
+
+
+// Basic info routes
+$route->router("/basicinfos/{action}", "src/Controller/basicinfocontroller.php");
 
 //write it at the last
 //arg is 404 file location

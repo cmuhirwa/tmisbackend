@@ -5,7 +5,6 @@ use Src\Models\AuthModel;
 use Src\Models\UsersModel;
 use Src\Models\RolesModel;
 use Src\System\Errors;
-use Src\System\Token;
 use Src\System\Encrypt;
 use Src\System\UuidGenerator;
 use \Firebase\JWT\JWT;
@@ -51,11 +50,6 @@ use Firebase\JWT\Key;
               }
               break;
             case 'DELETE':
-              if($this->params['action'] == "suspend"){
-                $response = $this->createAccount();
-              }else{
-                $response = $this->login();
-              }
             break;
           default:
             $response = Errors::notFoundError("Route not found!");
@@ -76,7 +70,7 @@ use Firebase\JWT\Key;
     }
     
     // Check if user is registered
-    $user = $this->usersModel->findByPhone($data['phone']);
+    $user = $this->usersModel->findByUsername($data['username']);
     if(sizeof($user) > 0) {
         return Errors::ExistError("Phone is already exist");
     }
@@ -87,18 +81,11 @@ use Firebase\JWT\Key;
     // Generate user id 
     $user_id = UuidGenerator::gUuid();
 
-    $authData['user_id'] = $user_id;
-    $authData['username'] = $data['phone'];
-    $authData['password'] = $default_password;
-
+    $data['password'] = $default_password;
     $data['user_id'] = $user_id;
     $data['created_by'] = $user_id;
 
-    $result = $this->usersModel->insert($data);
-
-    if($result == 1){
-      $this->authModel->insert($authData);
-    }
+    $this->usersModel->insert($data);
 
     $response['status_code_header'] = 'HTTP/1.1 201 Created';
     $response['body'] = json_encode([
@@ -113,8 +100,9 @@ use Firebase\JWT\Key;
     $rlt = new \stdClass();
 
     $all_headers = getallheaders();
-    $data->jwt = $all_headers['Authorization'];
-
+    if(isset($all_headers['Authorization'])){
+      $data->jwt = $all_headers['Authorization'];
+    }
     // Decoding jwt
     if(empty($data->jwt)){
       return Errors::notAuthorized();
@@ -149,7 +137,7 @@ use Firebase\JWT\Key;
       if(!self::validateCredential($input)){
           return Errors::unprocessableEntityResponse();
       }
-      $userAuthData = $this->authModel->findOne($input['username']);
+      $userAuthData = $this->usersModel->findByUsername($input['username']);
       if(sizeof($userAuthData) == 0){
         $response['status_code_header'] = 'HTTP/1.1 400 bad request!';
         $response['body'] = json_encode([
@@ -176,7 +164,7 @@ use Firebase\JWT\Key;
       $aud = "myusers";
       $user_array_data = array(
       "id"=>$userInfo[0]['user_id'],
-      "phone"=>$userInfo[0]['phone'],
+      "username"=>$userInfo[0]['username'],
       "email"=>$userInfo[0]['email'],
       );
 
@@ -200,6 +188,7 @@ use Firebase\JWT\Key;
       "user_info" => sizeof($userInfo) > 0 ? $userInfo[0] : null,
       "role" => sizeof($role) > 0 ? $role[0] : null
       ]);
+      
       return $response;
   }
   // Get all user by username
@@ -232,13 +221,16 @@ use Firebase\JWT\Key;
       if (empty($input['last_name'])) {
           return false;
       }
-      if (empty($input['phone'])) {
+      if (empty($input['phone_numbers'])) {
           return false;
       }
       if (empty($input['email'])) {
           return false;
       }
       if (empty($input['role_id'])) {
+          return false;
+      }
+       if (empty($input['username'])) {
           return false;
       }
       return true;
