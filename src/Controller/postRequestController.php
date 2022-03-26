@@ -32,7 +32,7 @@
               }
             break;
 
-            // ADDING AND UPDATING DATA
+            // ADDING OR UPDATING DATA
             case 'POST':
               if(sizeof($this->params) == 1){
                 if($this->params['action'] == 'headteacheraddarequest'){
@@ -78,17 +78,20 @@
 
     // Add A HT REQUEST
     function headteacheraddarequest(){
-      $input = (array) json_decode(file_get_contents('php://input'), TRUE);
-      // Validate input if not empty
-      if(!self::validateheadteacheraddarequestInfo($input)){
-        return Errors::unprocessableEntityResponse();
+      $data = (array) json_decode(file_get_contents('php://input'), TRUE);
+        // Validate input if not empty
+        if(empty($data)){
+          return Errors::unprocessableEntityResponse();
+        }
+      foreach($data as $input){
+
+        $result = $this->postRequestModel->addhdrequest($input);
+          
       }
-  
-      $result = $this->postRequestModel->addhdrequest($input);
-      //$userAuthData = $this->authModel->findOne($input['username']);
-      $response['status_code_header'] = 'HTTP/1.1 200 OK';
-      $response['body'] = json_encode($input);
-      return $response;
+        $response['status_code_header'] = 'HTTP/1.1 200 OK';
+        $response['body'] = json_encode($result);
+        return $response;
+      
     }
 
     // ADD A DEE REQUEST
