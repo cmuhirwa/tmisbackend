@@ -2,6 +2,7 @@
   namespace Src\Controller;
   use Src\System\Errors;
   use Src\Models\PostRequestModel;
+  use Src\System\AuthValidation;
 
     class postRequestController {
     private $db;
@@ -78,6 +79,22 @@
 
     // Add A HT REQUEST
     function headteacheraddarequest(){
+      $jwt_data = new \stdClass();
+
+      $all_headers = getallheaders();
+      if(isset($all_headers['Authorization'])){
+        $jwt_data->jwt = $all_headers['Authorization'];
+      }
+      // Decoding jwt
+      if(empty($jwt_data->jwt)){
+        return Errors::notAuthorized();
+      }
+      if(!AuthValidation::isValidJwt($jwt_data)){
+        return Errors::notAuthorized();
+      }
+
+      $user_id = AuthValidation::decodedData($jwt_data)->data->id;
+
       $data = (array) json_decode(file_get_contents('php://input'), TRUE);
         // Validate input if not empty
         if(empty($data)){
@@ -85,7 +102,7 @@
         }
       foreach($data as $input){
 
-        $result = $this->postRequestModel->addhdrequest($input);
+        $result = $this->postRequestModel->addhdrequest($input, $user_id);
           
       }
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
