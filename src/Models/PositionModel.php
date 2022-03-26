@@ -13,15 +13,14 @@ class PositionModel {
     public function findAll()
     {
       $statement = " 
-      SELECT p.position_id, p.position_name, sl.school_level_name
-      FROM positions p 
-      INNER JOIN school_levels sl ON p.school_level_code = sl.school_level_code ";
-
+      SELECT p.position_id, p.position_code, p.position_name, sl.school_level_name, p.qualification_id, q.qualification_name
+      FROM positions p  
+      INNER JOIN qualifications q ON p.qualification_id = q.qualification_id
+      INNER JOIN school_levels sl ON p.school_level_code = sl.school_level_code
+      ";
       try {
           $statement = $this->db->query($statement);
           $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
-          $result[0]['qualification'] = 'A0';
-          $result[0]['qualification_id'] = '1';
           return $result;
       } catch (\PDOException $e) {
           exit($e->getMessage());
