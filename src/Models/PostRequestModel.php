@@ -13,10 +13,11 @@ class PostRequestModel {
     public function getSchoolRequests($academicId, $schoolId)
     {
       $statement = " 
-      SELECT q.qualification_name, p.position_name, pr.post_request_id, pr.academic_calendar_id, pr.school_code, pr.position_code, pr.qualification_id, pr.head_teacher_id, pr.head_teacher_post_request, pr.head_teacher_reason_id, pr.dde_id_request, pr.dde_post_request, pr.dde_id_distribution, pr.dde_post_distribution, pr.dde_distribution_comment, pr.district_code, pr.created_by
+      SELECT q.qualification_name, p.position_name, prr.reason_name, pr.academic_calendar_id, pr.school_code, pr.position_code, pr.qualification_id, pr.head_teacher_id, pr.head_teacher_post_request, pr.head_teacher_reason_id, pr.dde_id_request, pr.dde_post_request, pr.dde_id_distribution, pr.dde_post_distribution, pr.dde_distribution_comment, pr.district_code, pr.created_by
       FROM post_request pr
       INNER JOIN qualifications q ON pr.qualification_id = q.qualification_id
       INNER JOIN positions p ON pr.position_code = p.position_code
+      INNER JOIN post_request_reasons prr ON pr.post_request_id = prr.reason_id
       
       
       WHERE pr.academic_calendar_id = ? AND pr.school_code = ?  ";
@@ -52,13 +53,17 @@ class PostRequestModel {
         }
     }
 
-    public function ddeaddarequest($data)
+    public function ddeaddarequest($data, $user_id)
     {
         $sql = "
             UPDATE 
                 post_request
             SET 
-            dde_id_request=:dde_id_request, dde_post_request=:dde_post_request, updated_by=:updated_by
+            dde_id_request=:dde_id_request,
+            dde_post_request_comment=:dde_post_request_comment, 
+            dde_post_request=:dde_post_request, 
+            district_code=:district_code,
+            updated_by=:updated_by
             WHERE 
             post_request_id=:post_request_id
         ";
@@ -67,9 +72,11 @@ class PostRequestModel {
             $statement = $this->db->prepare($sql);
             $statement->execute(array(
               ':post_request_id' => $data['post_request_id'],
-              ':dde_id_request' => $data['dde_id_request'],
+              ':dde_post_request_comment' => $data['dde_post_request_comment'],
               ':dde_post_request' => $data['dde_post_request'],
-              ':updated_by' =>$data['dde_id_request']
+              ':district_code' => $data['district_code'],
+              ':dde_id_request' => $user_id,
+              ':updated_by' =>$user_id,
             ));
 
             return $statement->rowCount();
@@ -82,7 +89,7 @@ class PostRequestModel {
     public function addhdrequest($data, $user_id){
         $statement = "
             SELECT * FROM post_request
-            WHERE academic_calendar_id = ? AND school_code = ? AND position_code = ? AND qualification_id = ?
+            WHERE academic_calendar_id = ? AND school_code = ? AND position_code = ? AND district_code = ? AND qualification_id = ?
         ";
         try {
             $statement = $this->db->prepare($statement);
@@ -90,6 +97,7 @@ class PostRequestModel {
             $data['academic_calendar_id'], 
             $data['school_code'], 
             $data['position_code'], 
+            $data['district_code'],
             $data['qualification_id']));
             $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
             if(sizeof($result) == 0){
@@ -140,9 +148,9 @@ class PostRequestModel {
         $statement = "
         INSERT 
           INTO post_request
-            (academic_calendar_id, school_code, position_code, qualification_id, head_teacher_id, head_teacher_post_request, head_teacher_reason_id, created_by)
+            (academic_calendar_id, school_code, position_code, qualification_id, head_teacher_id, head_teacher_post_request, head_teacher_reason_id, district_code, created_by)
           VALUES 
-            (:academic_calendar_id, :school_code, :position_code, :qualification_id, :head_teacher_id, :head_teacher_post_request, :head_teacher_reason_id, :created_by);
+            (:academic_calendar_id, :school_code, :position_code, :qualification_id, :head_teacher_id, :head_teacher_post_request, :head_teacher_reason_id, :district_code, :created_by);
         ";
         try {
           $statement = $this->db->prepare($statement);
@@ -154,6 +162,7 @@ class PostRequestModel {
               ':head_teacher_id' => $user_id,
               ':head_teacher_post_request' => $data['head_teacher_post_request'],
               ':head_teacher_reason_id' => $data['head_teacher_reason_id'],
+              ':district_code' => $data['district_code'],
               ':created_by' => $user_id
           ));
           return $statement->rowCount();

@@ -113,14 +113,30 @@
 
     // ADD A DEE REQUEST
     function ddeaddarequest(){
+      $jwt_data = new \stdClass();
+
+      $all_headers = getallheaders();
+      if(isset($all_headers['Authorization'])){
+        $jwt_data->jwt = $all_headers['Authorization'];
+      }
+      // Decoding jwt
+      if(empty($jwt_data->jwt)){
+        return Errors::notAuthorized();
+      }
+      if(!AuthValidation::isValidJwt($jwt_data)){
+        return Errors::notAuthorized();
+      }
+
+      $user_id = AuthValidation::decodedData($jwt_data)->data->id;
+
+
       $input = (array) json_decode(file_get_contents('php://input'), TRUE);
       // Validate input if not empty
       if(!self::validateddeaddarequestInfo($input)){
         return Errors::unprocessableEntityResponse();
       }
   
-      $result = $this->postRequestModel->ddeaddarequest($input);
-      //$userAuthData = $this->authModel->findOne($input['username']);
+      $result = $this->postRequestModel->ddeaddarequest($input, $user_id);
       $response['status_code_header'] = 'HTTP/1.1 200 OK';
       $response['body'] = json_encode($input);
       return $response;
@@ -160,14 +176,17 @@
     // DDE Validation
     private function validateddeaddarequestInfo($input)
     {
-      if (empty($input['post_request_id'])) {
+      if (empty($input['dde_post_request_comment'])) {
           return false;
       }
-      if (empty($input['dde_id_request'])) {
+      if (empty($input['post_request_id'])) {
           return false;
       }
       if (empty($input['dde_post_request'])) {
           return false;
+      }
+      if (empty($input['district_code'])){
+        return false;
       }
       return true;
     }
