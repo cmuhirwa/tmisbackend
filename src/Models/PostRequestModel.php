@@ -79,7 +79,7 @@ class PostRequestModel {
     }
 
 
-    public function addhdrequest($data){
+    public function addhdrequest($data, $user_id){
         $statement = "
             SELECT * FROM post_request
             WHERE academic_calendar_id = ? AND school_code = ? AND position_code = ? AND qualification_id = ?
@@ -93,10 +93,10 @@ class PostRequestModel {
             $data['qualification_id']));
             $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
             if(sizeof($result) == 0){
-                $result = $this->insertHdReauqest($data);
+                $result = $this->insertHdReauqest($data, $user_id);
             }
             else{
-                $result = $this->updateHdRequest($data);
+                $result = $this->updateHdRequest($data, $user_id);
             }
             return $result;
         } catch (\PDOException $e) {
@@ -105,7 +105,7 @@ class PostRequestModel {
 
     }
 
-    public function updateHdRequest($data){
+    public function updateHdRequest($data, $user_id){
 
         $sql = "
             UPDATE 
@@ -136,7 +136,7 @@ class PostRequestModel {
         } 
     }
 
-    public function insertHdReauqest($data){
+    public function insertHdReauqest($data, $user_id){
         $statement = "
         INSERT 
           INTO post_request
@@ -151,10 +151,10 @@ class PostRequestModel {
               ':school_code' => $data['school_code'],
               ':position_code' => $data['position_code'],
               ':qualification_id' => $data['qualification_id'],
-              ':head_teacher_id' => $data['head_teacher_id'],
+              ':head_teacher_id' => $user_id,
               ':head_teacher_post_request' => $data['head_teacher_post_request'],
               ':head_teacher_reason_id' => $data['head_teacher_reason_id'],
-              ':created_by' => $data['head_teacher_id']
+              ':created_by' => $user_id
           ));
           return $statement->rowCount();
         } catch (\PDOException $e) {

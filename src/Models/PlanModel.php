@@ -45,7 +45,7 @@ class PlanModel {
       }
     }
 
-    public function insert($data){
+    public function insert($data, $user_id){
       $statement = "
         INSERT 
           INTO academic_calendar 
@@ -74,7 +74,7 @@ class PlanModel {
               ':external_transfer_assessment_end' => $data['external_transfer_assessment_end'],
               ':teacher_recruitment_start' => $data['teacher_recruitment_start'],
               ':teacher_recruitment_end' => $data['teacher_recruitment_end'],
-              ':createdB_by' => $data['createdB_by'],
+              ':createdB_by' => $user_id,
           ));
           return $statement->rowCount();
         } catch (\PDOException $e) {
