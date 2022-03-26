@@ -17,7 +17,7 @@ class PostRequestModel {
       FROM post_request pr
       INNER JOIN qualifications q ON pr.qualification_id = q.qualification_id
       INNER JOIN positions p ON pr.position_code = p.position_code
-      INNER JOIN post_request_reasons prr ON pr.post_request_id = prr.reason_id
+      INNER JOIN post_request_reasons prr ON pr.head_teacher_reason_id = prr.reason_id
       
       
       WHERE pr.academic_calendar_id = ? AND pr.school_code = ?  ";
