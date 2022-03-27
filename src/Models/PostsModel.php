@@ -9,7 +9,7 @@ class PostsModel {
     {
       $this->db = $db;
     }
-  public function update($data,$user_id){
+  public function distributeToSchool($data,$user_id){
     $statement = "
       UPDATE 
         post_requests 
@@ -66,19 +66,38 @@ class PostsModel {
       } catch (\PDOException $e) {
       exit($e->getMessage());
       }
+
   }
-  public function findSumOfDistributed($position_code,$academic_year_id,$district_code){
+  public function findSumOfDistributed($district_code,$qualification_id,$academic_year_id){
     $statement = "
       SELECT
-        position_code, academic_year_id, SUM(dde_post_distribution) as dde_post_distribution 
+      qualification_id, academic_year_id, SUM(dde_post_distribution) as dde_post_distribution 
       FROM 
         post_requests 
       WHERE 
-        position_code=? AND academic_year_id=? AND district_code=?
+      qualification_id=? AND academic_year_id=? AND district_code=?
       ";
       try {
       $statement = $this->db->prepare($statement);
-      $statement->execute(array($position_code,$academic_year_id,$district_code));
+      $statement->execute(array($qualification_id,$academic_year_id,$district_code));
+      $statement = $statement->fetchAll(\PDO::FETCH_ASSOC);
+      return $statement;
+      } catch (\PDOException $e) {
+      exit($e->getMessage());
+      }
+  }
+  public function findDistrictDistribution($district_code,$academic_year_id){
+    $statement = "
+      SELECT
+        pr.*, sch.school_name, q.qualification_name, p.position_name
+      FROM 
+        post_requests pr, schools sch, qualifications q, positions p
+      WHERE 
+        pr.district_code=? AND pr.academic_year_id=? AND pr.school_code=sch.school_code AND pr.qualification_id=q.qualification_id AND pr.position_code=p.position_code
+      ";
+      try {
+      $statement = $this->db->prepare($statement);
+      $statement->execute(array($district_code,$academic_year_id,));
       $statement = $statement->fetchAll(\PDO::FETCH_ASSOC);
       return $statement;
       } catch (\PDOException $e) {

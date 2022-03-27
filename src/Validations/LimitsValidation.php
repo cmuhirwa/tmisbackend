@@ -17,7 +17,7 @@ class LimitsValidation {
         if (empty($input['qualification_id'])) {
             return false;
         }
-        if (empty($input['limits'])) {
+        if (!isset($input['limits']) || $input['limits'] < 0) {
             return false;
         }
         if (empty($input['distribution_comment'])) {
@@ -30,7 +30,7 @@ class LimitsValidation {
         if (empty($input['post_request_id'])) {
             return false;
         }
-           if (empty($input['dde_post_distribution'])) {
+           if (!isset($input['dde_post_distribution']) || $input['dde_post_distribution'] < 0) {
             return false;
         }
         if (empty($input['academic_year_id'])) {
