@@ -5,6 +5,11 @@ use Firebase\JWT\Key;
 
 class AuthValidation {
 
+    public static function encodeData($payload_info,$secret_key){
+      $jwt = JWT::encode($payload_info,$secret_key,'HS512');
+        return $jwt;
+    }
+    
     public static function isValidJwt($data){
         try {
               $secret_key = "owt125";

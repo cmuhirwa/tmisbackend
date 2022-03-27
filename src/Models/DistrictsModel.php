@@ -1,7 +1,7 @@
 <?php
 namespace Src\Models;
 
-class SchoolsModel {
+class DistrictsModel {
 
     private $db = null;
 
@@ -15,7 +15,7 @@ class SchoolsModel {
           SELECT 
               *
           FROM
-            schools
+            districts
       ";
       try {
         $statement = $this->db->prepare($statement);
@@ -26,18 +26,18 @@ class SchoolsModel {
           exit($e->getMessage());
       }
     }
-  public function findByCode($schoolcode)
+  public function findByCode($district_code)
   {
     $statement = "
         SELECT 
             *
         FROM
-            schools WHERE school_code=?
+            districts WHERE district_code=?
     ";
 
     try {
       $statement = $this->db->prepare($statement);
-      $statement->execute(array($schoolcode));
+      $statement->execute(array($district_code));
       $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
       return $result;
     } catch (\PDOException $e) {

@@ -14,7 +14,7 @@ class SchoolLocationsModel {
       $statement = "
         SELECT DISTINCT 
             district_code, district_name 
-        FROM schoollocation ORDER BY district_code, district_name;
+        FROM schoollocation ORDER BY district_code, district_name
       ";
       try {
         $statement = $this->db->prepare($statement);
@@ -28,15 +28,55 @@ class SchoolLocationsModel {
   public function findDistrictByCode($district_code)
   {
     $statement = "
-        SELECT 
-            *
-        FROM
-            schoollocation WHERE district_code = ?
+      SELECT DISTINCT 
+        district_code, district_name
+      FROM 
+        schoollocation 
+      WHERE 
+        district_code=? ORDER BY district_code, district_name
     ";
 
     try {
       $statement = $this->db->prepare($statement);
       $statement->execute(array($district_code));
+      $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+      return $result;
+    } catch (\PDOException $e) {
+        exit($e->getMessage());
+    }
+  }
+
+  public function findSectorByCoder($sector_code){
+    $sql = " 
+      SELECT DISTINCT 
+        sector_code, sector_name 
+      FROM 
+        schoollocation 
+      WHERE 
+        sector_code=? ORDER BY sector_code, sector_name";
+    try {
+      $statement = $this->db->prepare($sql);
+      $statement->execute(array($sector_code));
+      $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+      return $result;
+    } catch (\PDOException $e) {
+        exit($e->getMessage());
+    }
+  }
+  public function findDistrictSchools($district_code)
+  {
+    $statement = "
+      SELECT
+         *  
+        FROM 
+          schools 
+      WHERE 
+        region_code LIKE ?
+    ";
+
+    try {
+      $statement = $this->db->prepare($statement);
+      $statement->execute(array($district_code.'%'));
       $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
       return $result;
     } catch (\PDOException $e) {

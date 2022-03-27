@@ -1,7 +1,7 @@
 <?php
 namespace Src\Models;
 
-class SchoolsModel {
+class StakeholdersModel {
 
     private $db = null;
 
@@ -15,7 +15,7 @@ class SchoolsModel {
           SELECT 
               *
           FROM
-            schools
+            stakeholders
       ";
       try {
         $statement = $this->db->prepare($statement);
@@ -26,18 +26,18 @@ class SchoolsModel {
           exit($e->getMessage());
       }
     }
-  public function findByCode($schoolcode)
+  public function findByCode($stakeholder_id)
   {
     $statement = "
         SELECT 
             *
         FROM
-            schools WHERE school_code=?
+            stakeholders 
+        WHERE stakeholder_id=?
     ";
-
     try {
       $statement = $this->db->prepare($statement);
-      $statement->execute(array($schoolcode));
+      $statement->execute(array($stakeholder_id));
       $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
       return $result;
     } catch (\PDOException $e) {
