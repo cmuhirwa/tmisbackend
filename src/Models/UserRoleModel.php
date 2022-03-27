@@ -65,10 +65,10 @@ class UserRoleModel {
     }
     public function findCurrentUserRole($user_id){
         $sql = "
-        SELECT * FROM 
-            user_to_role 
+        SELECT ur.*, r.role FROM 
+            user_to_role ur, roles r
         WHERE 
-            user_id=:user_id AND status=:status";
+          ur.user_id=:user_id AND ur.status=:status AND ur.role_id=r.role_id";
         try {
             $statement = $this->db->prepare($sql);
             $statement->execute(array(
@@ -82,19 +82,21 @@ class UserRoleModel {
             exit($e->getMessage());
         } 
     }
-    public function findCurrentSchoolTeachers($school_id){
+    public function findCurrentSchoolTeachers($school_code){
         $sql = "
             SELECT 
                 user_id,role_id,qualification_id,academic_year_id 
             FROM 
                 user_to_role
-            WHERE school_id=:school_id
+            WHERE school_code=:school_code
         ";      
         try {
             $statement = $this->db->prepare($sql);
             $statement->execute(array(
-                ':user_id' => $school_id,
+                ':school_code' => $school_code,
             ));
+          $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+          return $result;
         } catch (\PDOException $e) {
             exit($e->getMessage());
         } 

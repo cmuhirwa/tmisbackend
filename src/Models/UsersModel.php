@@ -13,13 +13,14 @@ class UsersModel {
       $statement = "
         INSERT 
           INTO users 
-            (user_id,first_name,last_name,phone_numbers,email,username,password,created_by)
-          VALUES (:user_id,:first_name,:last_name,:phone_numbers,:email,:username,:password,:created_by);
+            (user_id,role_id,first_name,last_name,phone_numbers,email,username,password,created_by)
+          VALUES (:user_id,:role_id,:first_name,:last_name,:phone_numbers,:email,:username,:password,:created_by);
         ";
         try {
           $statement = $this->db->prepare($statement);
           $statement->execute(array(
               ':user_id' => $data['user_id'],
+              ':role_id' => $data['role_id'],
               ':first_name' => $data['first_name'],
               ':last_name' => $data['last_name'],
               ':phone_numbers' => $data['phone_numbers'],

@@ -19,7 +19,9 @@ use Src\Routes\MainRoutes;
 //Route instance
 $route = new MainRoutes();
 
-//route address and home.php file location
+            //---Joseph Routes---//
+
+//route address and location
 
 // Users routes 
 $route->router("/user", "src/Controller/userscontroller.php");
@@ -50,14 +52,16 @@ $route->router("/rebdistribution", "src/Controller/rebdistributionsmodel.php");
 $route->router("/rebdistribution/{action}/{academic_year_id}", "src/Controller/rebdistributionsmodel.php");
 
 // District distribution post to school
-$route->router("/districtdistribution", "src/Controller/posts.php");
+$route->router("/districtdistribution/{action}", "src/Controller/posts.php");
+$route->router("/districtdistribution/{action}/{district_code}/{academic_year_id}", "src/Controller/posts.php");
+
+ // Reports routes
+$route->router("/report/school/{action}/{school_code}", "src/Controller/reportscontroller.php");
+$route->router("/report/district/{action}/{district_code}", "src/Controller/reportscontroller.php");
 
 
 // Basic info routes
 $route->router("/basicinfos/{action}", "src/Controller/basicinfocontroller.php");
-
-
-
 
         //---Clement Routes---//
 
@@ -82,7 +86,5 @@ $route->router("/qualifications", "src/Controller/qualificationController.php");
 //write it at the last
 //arg is 404 file location
 $route->notFound("404.php");
-
-
 
 ?>

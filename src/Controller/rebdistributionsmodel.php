@@ -79,19 +79,15 @@ use Src\System\UuidGenerator;
             return Errors::unprocessableEntityResponse();
         } 
 
-        $reb_limits = $this->minecofinLimitsModel->findAcademicYearLimits($input['academic_year_id']);
+        $remainLimitBefore = self::remainLimitsOnRebToDistricts($input);
 
-        $remainLimits = [];
-        foreach ($reb_limits as $value) {
-         array_push($remainLimits,self::getLimitsByAcademicAndQualification($value['academic_year_id'],$value['qualification_id'],$value['limits']));
-        }
 
         if(!self::isExceedLimits($input['academic_year_id'],$input['qualification_id'],$input['limits'])){
           $response['status_code_header'] = 'HTTP/1.1 200 success';
           $response['body'] = json_encode([
             "message" => "Distribution is exceeding allocated qualification post!",
             "academic_distributed" => null,
-            "total_distributed" => $remainLimits
+            "total_distributed" => $remainLimitBefore
           ]);
           return $response;
         }
@@ -105,7 +101,10 @@ use Src\System\UuidGenerator;
         }else{
            $result = $this->rebDistributionsModelModel->insert($input,$user_id);
         }
+        
+        $remainLimits = self::remainLimitsOnRebToDistricts($input);
 
+        $academic_distributed->message ="Updated successful";
         $academic_distributed->academic_distributed = sizeof($result) > 0 ? $result[0] : null;
         $academic_distributed->total_distributed = $remainLimits;
 
@@ -113,6 +112,17 @@ use Src\System\UuidGenerator;
         $response['body'] = json_encode($academic_distributed);
         return $response;
     }
+    function remainLimitsOnRebToDistricts($input){
+      
+      $reb_limits = $this->minecofinLimitsModel->findAcademicYearLimits($input['academic_year_id']);
+
+      $remainLimits = [];
+      foreach ($reb_limits as $value) {
+       array_push($remainLimits,self::getLimitsByAcademicAndQualification($value['academic_year_id'],$value['qualification_id'],$value['limits']));
+      }
+      return $remainLimits;
+    }
+
     function getLimitsByAcademicYear($academic_year_id){
             $jwt_data = new \stdClass();
 

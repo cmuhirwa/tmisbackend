@@ -73,7 +73,6 @@ use Src\System\AuthValidation;
         $exists = [];
         foreach ($data as $value) {
             if(!empty($value)){
-
                $is_exist = $this->minecofinLimitsModel->findLimitByAcademicYearQualification($value['academic_year_id'],$value['qualification_id']);
                 if(sizeof($is_exist) > 0){
                     $this->minecofinLimitsModel->update($value,$user_id);
