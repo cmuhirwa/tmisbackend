@@ -79,7 +79,6 @@
 
       $data = (array) json_decode(file_get_contents('php://input'), TRUE);
 
-      // CHECK IF ITS A SUSPENSION OR TERMINATION
          // Validate input if not empty
         if(!self::validateTeacherTransferRequestInfo($data)){
               return Errors::unprocessableEntityResponse();
@@ -113,7 +112,7 @@
 
       // CHECK IF ITS A SUSPENSION OR TERMINATION
          // Validate input if not empty
-        if(!self::validateTeacherTransferRequestInfo($data)){
+        if(!self::validateIncomingDdeDecisionInfo($data)){
               return Errors::unprocessableEntityResponse();
         }
         // CALL MODELS TO REQUEST TO A TRANSFER
@@ -143,16 +142,16 @@
 
     private function validateIncomingDdeDecisionInfo($input)
     {
-      if (empty($input['school_from_id'])) {
+      if (empty($input['teacherTransfer_id'])) {
         return false;
       }
-      if (empty($input['school_to_id'])) {
+      if (empty($input['incoming_decision'])) {
         return false;
       }
-      if (empty($input['teacher_reason'])) {
+      if (empty($input['incoming_approved_on_school_id'])) {
           return false;
       }
-      if (empty($input['teacher_supporting_document'])) {
+      if (empty($input['incoming_comment'])) {
           return false;
       }
       return true;

@@ -15,7 +15,7 @@ class TeacherTransferModel {
       $statement = " 
       SELECT * FROM 
       schools s
-      INNER JOIN school_location sl ON s.village_id = sl.village_id
+      INNER JOIN school_location sl ON s.region_code = sl.village_id
       WHERE sl.district_code = $district_code";
 
       try {
@@ -31,15 +31,15 @@ class TeacherTransferModel {
     public function teacherRequestATransfer($data, $user_id)
     {
       $statement = "
-      INSERT INTO teacherTransfer(
-        techer_id, school_from_id, school_to_id, 
-        teacher_reason, teacher_supporting_document
-      )
-          VALUES 
-            (:techer_id, :school_from_id, :school_to_id, 
-            :teacher_reason, :teacher_supporting_document
-          );
-        ";
+        INSERT INTO teacherTransfer(
+          techer_id, school_from_id, school_to_id, 
+          teacher_reason, teacher_supporting_document
+        )
+            VALUES 
+              (:techer_id, :school_from_id, :school_to_id, 
+              :teacher_reason, :teacher_supporting_document
+            );
+          ";
         try 
         {
           $statement = $this->db->prepare($statement);
@@ -59,32 +59,30 @@ class TeacherTransferModel {
 
     public function ddeTransferDecision($data, $user_id)
     {
-      if($data['decision'] == 'SUSPENDED'){
-        $decided_to_suspend_from  =$data['decided_to_suspend_from'];
-        $decided_to_suspend_to    =$data['decided_to_suspend_to'];
-      }elseif($data['decision'] == 'TERMINATED'){
-        $decided_to_suspend_from  =null;
-        $decided_to_suspend_to =null;
+      if($data['incoming_decision'] == 'APPROVED'){
+        $incoming_approved_on_school_id  = $data['incoming_approved_on_school_id'];
+      }elseif($data['incoming_decision'] == 'REJECTED'){
+        $incoming_approved_on_school_id  =null;
       }
       $sql = "
             UPDATE 
               teacherTransfer
             SET 
-            decided_by_id=:decided_by_id,status=:status,decided_to_suspend_from=:decided_to_suspend_from,decided_to_suspend_to=:decided_to_suspend_to,
-            decided_by_comment=:decided_by_comment,decided_by_date=:decided_by_date
-            WHERE change_staff_status_id=:change_staff_status_id;
+            incoming_dde_id=:incoming_dde_id,incoming_decision=:incoming_decision,incoming_approved_on_school_id=:incoming_approved_on_school_id,incoming_comment=:incoming_comment,incoming_decision_date=:incoming_decision_date
+
+            WHERE teacherTransfer_id=:teacherTransfer_id;
         ";
 
         try {
             $statement = $this->db->prepare($sql);
             $statement->execute(array(
-              ':change_staff_status_id' => $data['change_staff_status_id'],
-              ':decided_by_id' => $user_id,
-              ':status' => $data['decision'],
-              ':decided_to_suspend_from' => $decided_to_suspend_from,
-              ':decided_to_suspend_to' => $decided_to_suspend_to,
-              ':decided_by_comment' => $data['decided_by_comment'],
-              ':decided_by_date' => date("Y-m-d"),
+              ':incoming_dde_id' => $user_id,
+              ':incoming_decision' => $data['incoming_decision'],
+              ':incoming_approved_on_school_id' => $data['incoming_approved_on_school_id'],
+              ':incoming_comment' => $data['incoming_comment'],
+              ':incoming_comment' => $data['incoming_comment'],
+              ':incoming_decision_date' => date("Y-m-d"),
+              ':teacherTransfer_id' => $data['teacherTransfer_id'],
             ));
 
             return $statement->rowCount();
