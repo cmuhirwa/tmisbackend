@@ -16,7 +16,7 @@ class TeacherTransferModel {
       SELECT * FROM 
       schools s
       INNER JOIN school_location sl ON s.village_id = sl.village_id
-      WHERE sl.district_code = 11";
+      WHERE sl.district_code = $district_code";
 
       try {
           $statement = $this->db->prepare($statement);
