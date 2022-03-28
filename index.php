@@ -83,6 +83,13 @@ $route->router("/postrequest/request/{action}", "src/Controller/postRequestContr
 // Qualifications
 $route->router("/qualifications", "src/Controller/qualificationController.php");
 
+// Suspenion and Termination
+$route->router("/changeTeacherStatusController/{action}", "src/Controller/changeTeacherStatusController.php");
+
+// Teacher transfer
+$route->router("/teachertransfer/{action}/{id}", "src/Controller/teacherTransferController.php");
+$route->router("/teachertransfer", "src/Controller/teacherTransferController.php");
+
 //write it at the last
 //arg is 404 file location
 $route->notFound("404.php");
