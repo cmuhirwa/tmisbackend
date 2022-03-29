@@ -193,32 +193,32 @@ class TeacherTransferModel {
     public function getTeacherTreansferRequestForOutgoingDde($user_id)
     {
       $statement = " 
-      SELECT tt.teacherTransfer_id, tt.techer_id,
-tt.requested_school_id,
-        
-        (
-            SELECT s.school_name FROM schools s WHERE s.school_id = tt.requested_school_id
-        ) requested_school_name,
-        (
-            SELECT sl.district_name
-          FROM schools s 
-          INNER JOIN school_location sl ON sl.village_id = s.region_code
-          WHERE s.school_id = tt.requested_school_id
-        ) requested_school_district,
-        (
-            SELECT sl.sector_name
-          FROM schools s 
-          INNER JOIN school_location sl ON sl.village_id = s.region_code
-          WHERE s.school_id = tt.requested_school_id
-        ) requested_school_sector,
-        tt.requested_date
+            SELECT tt.teacherTransfer_id, tt.techer_id,
+            tt.requested_school_id,
+                    
+                    (
+                        SELECT s.school_name FROM schools s WHERE s.school_id = tt.requested_school_id
+                    ) requested_school_name,
+                    (
+                        SELECT sl.district_name
+                      FROM schools s 
+                      INNER JOIN school_location sl ON sl.village_id = s.region_code
+                      WHERE s.school_id = tt.requested_school_id
+                    ) requested_school_district,
+                    (
+                        SELECT sl.sector_name
+                      FROM schools s 
+                      INNER JOIN school_location sl ON sl.village_id = s.region_code
+                      WHERE s.school_id = tt.requested_school_id
+                    ) requested_school_sector,
+                    tt.requested_date
 
-        
+                    
 
-FROM teacher_transfer tt
-INNER JOIN schools s ON s.school_id = tt.requested_school_id
-INNER JOIN school_location sl ON sl.village_id = s.region_code
-WHERE sl.district_code = ?";
+            FROM teacher_transfer tt
+            INNER JOIN schools s ON s.school_id = tt.requested_school_id
+            INNER JOIN school_location sl ON sl.village_id = s.region_code
+            WHERE sl.district_code = ?";
 
       try {
           $statement = $this->db->prepare($statement);
