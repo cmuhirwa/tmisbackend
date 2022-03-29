@@ -93,28 +93,32 @@ class TeacherTransferModel {
     public function getTeacherTreansferRequest($user_id)
     {
       $statement = " 
-        SELECT tt.teacherTransfer_id, 
-        tt.school_to_id requested_school_id, 
-        (SELECT s.school_name FROM schools s WHERE s.school_id = tt.school_to_id) requested_school_name,
-        tt.school_to_id,
+        SELECT tt.teacherTransfer_id, tt.teacher_supporting_document, 
+
+        tt.requested_school_id,
         (
-            SELECT s.school_name FROM schools s WHERE s.school_id = tt.approved_school_id
-        ) approved_school_name,
+            SELECT s.school_name FROM schools s WHERE s.school_id = tt.requested_school_id
+        ) requested_school_name,
         (
             SELECT sl.district_name
           FROM schools s 
           INNER JOIN school_location sl ON sl.village_id = s.region_code
-          WHERE s.school_id = tt.school_to_id
-        ) incoming_district,
+          WHERE s.school_id = tt.requested_school_id
+        ) requested_school_district,
         (
             SELECT sl.sector_name
           FROM schools s 
           INNER JOIN school_location sl ON sl.village_id = s.region_code
-          WHERE s.school_id = tt.school_to_id
-        ) incoming_sector,
-        tt.requested_date, tt.incoming_decision, tt.incoming_decision, tt.incoming_decision_date, tt.outgoing_dde_decision, tt.outgoing_dde_comment, tt.outgoing_dde_decision_date 
-        FROM teacherTransfer tt
-      
+          WHERE s.school_id = tt.requested_school_id
+        ) requested_school_sector,
+
+        tt.approved_school_id,
+        (
+            SELECT s.school_name FROM schools s WHERE s.school_id = tt.approved_school_id
+        ) approved_school_name,
+
+        tt.requested_date, tt.requested_decision, tt.requested_decision, tt.requested_comment, tt.requested_decision_date, tt.outgoing_dde_decision, tt.outgoing_dde_comment, tt.outgoing_dde_decision_date 
+        FROM teacher_transfer tt
       
         WHERE  tt.techer_id = ?";
 
