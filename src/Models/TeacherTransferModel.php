@@ -93,13 +93,13 @@ class TeacherTransferModel {
     public function getTeacherTreansferRequest($user_id)
     {
       $statement = " 
-        SELECT s.school_name, sl.district_name, sl.sector_name, tt.requested_date, tt.incoming_decision, tt.incoming_decision, tt.incoming_decision_date, tt.outgoing_dde_decision, 
+        SELECT tt.teacherTransfer_id, s.school_name, sl.district_name, sl.sector_name, tt.requested_date, tt.incoming_decision, tt.incoming_decision, tt.incoming_decision_date, tt.outgoing_dde_decision, 
         tt.outgoing_dde_comment, tt.outgoing_dde_decision_date
 
         FROM teacherTransfer tt
         INNER JOIN schools s ON s.school_id = tt.school_to_id
         INNER JOIN school_location sl ON sl.village_id = s.region_code
-        
+
         WHERE  tt.techer_id = ?";
 
       try {
