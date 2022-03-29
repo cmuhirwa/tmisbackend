@@ -28,9 +28,12 @@
                 if($this->params['action'] == 'getschoolsperdistrict'){
                   $response = $this->getSchoolsPerDistrict($this->params['id']);
                 }
-              }
-              elseif(sizeof($this->params) == 0){
-                $response = $this->getTeacherTreansferRequest();
+                elseif($this->params['action'] == 'teacher'){
+                  $response = $this->getTeacherTreansferRequest($this->params['id']);
+                }
+                elseif($this->params['action'] == 'dde'){
+                  $response = $this->getSchoolsPerDistrict($this->params['id']);
+                }
               }
             break;
 
