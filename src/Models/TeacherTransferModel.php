@@ -16,7 +16,7 @@ class TeacherTransferModel {
       SELECT * FROM 
       schools s
       INNER JOIN school_location sl ON s.region_code = sl.village_id
-      WHERE sl.district_code = $district_code";
+      WHERE sl.district_code = ?";
 
       try {
           $statement = $this->db->prepare($statement);
@@ -78,8 +78,7 @@ class TeacherTransferModel {
             $statement->execute(array(
               ':incoming_dde_id' => $user_id,
               ':incoming_decision' => $data['incoming_decision'],
-              ':incoming_approved_on_school_id' => $data['incoming_approved_on_school_id'],
-              ':incoming_comment' => $data['incoming_comment'],
+              ':incoming_approved_on_school_id' => $incoming_approved_on_school_id,
               ':incoming_comment' => $data['incoming_comment'],
               ':incoming_decision_date' => date("Y-m-d"),
               ':teacherTransfer_id' => $data['teacherTransfer_id'],
@@ -89,6 +88,28 @@ class TeacherTransferModel {
         } catch (\PDOException $e) {
             exit($e->getMessage());
         }
+    }
+
+    public function getTeacherTreansferRequest($user_id)
+    {
+      $statement = " 
+        SELECT s.school_name, sl.district_name, sl.sector_name, tt.requested_date, tt.incoming_decision, tt.incoming_decision, tt.incoming_decision_date, tt.outgoing_dde_decision, 
+        tt.outgoing_dde_comment, tt.outgoing_dde_decision_date
+
+        FROM teacherTransfer tt
+        INNER JOIN schools s ON s.school_id = tt.school_to_id
+        INNER JOIN school_location sl ON sl.village_id = s.region_code
+        
+        WHERE  tt.techer_id = ?";
+
+      try {
+          $statement = $this->db->prepare($statement);
+          $statement->execute(array($user_id));
+          $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+          return $result;
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }
     }
 }
 ?>
