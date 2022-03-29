@@ -94,11 +94,11 @@ class TeacherTransferModel {
     {
       $statement = " 
         SELECT tt.teacherTransfer_id, 
-        tt.school_from_id, 
-        (SELECT s.school_name FROM schools s WHERE s.school_id = tt.school_from_id) school_from_name,
+        tt.school_to_id requested_school_id, 
+        (SELECT s.school_name FROM schools s WHERE s.school_id = tt.school_to_id) requested_school_name,
         tt.school_to_id,
         (
-            SELECT s.school_name FROM schools s WHERE s.school_id = tt.school_to_id
+            SELECT s.school_name FROM schools s WHERE s.school_id = tt.approved_school_id
         ) approved_school_name,
         (
             SELECT sl.district_name
@@ -114,6 +114,7 @@ class TeacherTransferModel {
         ) incoming_sector,
         tt.requested_date, tt.incoming_decision, tt.incoming_decision, tt.incoming_decision_date, tt.outgoing_dde_decision, tt.outgoing_dde_comment, tt.outgoing_dde_decision_date 
         FROM teacherTransfer tt
+      
       
         WHERE  tt.techer_id = ?";
 
