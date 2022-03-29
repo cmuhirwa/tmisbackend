@@ -88,7 +88,7 @@ $route->router("/changeTeacherStatusController/{action}", "src/Controller/change
 
 // Teacher transfer
 $route->router("/teachertransfer/{action}/{id}", "src/Controller/teacherTransferController.php");
-$route->router("/teachertransfer", "src/Controller/teacherTransferController.php");
+$route->router("/teachertransfer/{action}", "src/Controller/teacherTransferController.php");
 
 //write it at the last
 //arg is 404 file location
