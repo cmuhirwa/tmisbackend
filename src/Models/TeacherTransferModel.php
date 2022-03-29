@@ -131,5 +131,49 @@ class TeacherTransferModel {
           exit($e->getMessage());
       }
     }
+
+    public function getTeacherTreansferRequestForRequestedDde($user_id)
+    {
+      $statement = " 
+      SELECT tt.teacherTransfer_id, tt.techer_id,
+      tt.school_from_id,
+              (
+                  SELECT s.school_name FROM schools s WHERE s.school_id = tt.school_from_id
+              ) school_from_name,
+              
+              tt.requested_school_id,
+              (
+                  SELECT s.school_name FROM schools s WHERE s.school_id = tt.requested_school_id
+              ) requested_school_name,
+              (
+                  SELECT sl.district_name
+                FROM schools s 
+                INNER JOIN school_location sl ON sl.village_id = s.region_code
+                WHERE s.school_id = tt.requested_school_id
+              ) requested_school_district,
+              (
+                  SELECT sl.sector_name
+                FROM schools s 
+                INNER JOIN school_location sl ON sl.village_id = s.region_code
+                WHERE s.school_id = tt.requested_school_id
+              ) requested_school_sector,
+              tt.requested_date
+      
+              
+      
+      FROM teacher_transfer tt
+      INNER JOIN schools s ON s.school_id = tt.requested_school_id
+      INNER JOIN school_location sl ON sl.village_id = s.region_code
+      WHERE sl.district_code = ?";
+
+      try {
+          $statement = $this->db->prepare($statement);
+          $statement->execute(array(26));
+          $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+          return $result;
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }
+    }
 }
 ?>

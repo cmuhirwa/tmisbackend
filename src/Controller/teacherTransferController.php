@@ -31,8 +31,8 @@
                 elseif($this->params['action'] == 'teacher'){
                   $response = $this->getTeacherTreansferRequest($this->params['id']);
                 }
-                elseif($this->params['action'] == 'dde'){
-                  $response = $this->getSchoolsPerDistrict($this->params['id']);
+                elseif($this->params['action'] == 'requesteddde'){
+                  $response = $this->getTeacherTreansferRequestFoDde($this->params['id']);
                 }
               }
             break;
@@ -73,6 +73,29 @@
 
       $user_id = AuthValidation::decodedData($jwt_data)->data->id;
       $result = $this->teacherTransferModel->getTeacherTreansferRequest($user_id);
+        
+      $response['status_code_header'] = 'HTTP/1.1 200 OK';
+      $response['body'] = json_encode($result);
+      return $response;
+    }
+
+    function getTeacherTreansferRequestFoDde(){
+      $jwt_data = new \stdClass();
+
+      $all_headers = getallheaders();
+      if(isset($all_headers['Authorization'])){
+        $jwt_data->jwt = $all_headers['Authorization'];
+      }
+      // Decoding jwt
+      if(empty($jwt_data->jwt)){
+        return Errors::notAuthorized();
+      }
+      if(!AuthValidation::isValidJwt($jwt_data)){
+        return Errors::notAuthorized();
+      }
+
+      $user_id = AuthValidation::decodedData($jwt_data)->data->id;
+      $result = $this->teacherTransferModel->getTeacherTreansferRequestForRequestedDde($user_id);
         
       $response['status_code_header'] = 'HTTP/1.1 200 OK';
       $response['body'] = json_encode($result);
