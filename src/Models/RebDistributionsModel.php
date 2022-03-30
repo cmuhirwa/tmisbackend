@@ -20,7 +20,7 @@ class RebDistributionsModel {
         SELECT 
           rd.*, d.district_name
         FROM 
-          reb_distributions rd , schoollocation d 
+          reb_distributions rd , school_location d 
         WHERE 
             rd.academic_year_id=:academic_year_id AND rd.qualification_id=:qualification_id AND rd.district_code=:district_code AND rd.district_code=d.district_code";
         try {
@@ -61,7 +61,7 @@ class RebDistributionsModel {
     SELECT 
       rd.*, d.district_name
     FROM 
-      reb_distributions rd , schoollocation d 
+      reb_distributions rd , school_location d 
     WHERE 
         rd.academic_year_id=:academic_year_id AND rd.qualification_id=:qualification_id AND rd.district_code=:district_code AND rd.district_code=d.district_code LIMIT 1";
     try {
@@ -107,7 +107,7 @@ class RebDistributionsModel {
       SELECT 
         DISTINCT rd.*, d.district_code, d.district_name
       FROM 
-        reb_distributions rd , schoollocation d 
+        reb_distributions rd , school_location d 
       WHERE 
         rd.academic_year_id=? AND rd.district_code=d.district_code";
       try {
