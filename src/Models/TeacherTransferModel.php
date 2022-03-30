@@ -70,7 +70,7 @@ class TeacherTransferModel {
             SET 
             incoming_dde_id=:incoming_dde_id,incoming_decision=:incoming_decision,incoming_approved_on_school_id=:incoming_approved_on_school_id,incoming_comment=:incoming_comment,incoming_decision_date=:incoming_decision_date
 
-            WHERE teacherTransfer_id=:teacherTransfer_id;
+            WHERE teacher_transfer_id=:teacher_transfer_id;
         ";
 
         try {
@@ -81,7 +81,7 @@ class TeacherTransferModel {
               ':incoming_approved_on_school_id' => $incoming_approved_on_school_id,
               ':incoming_comment' => $data['incoming_comment'],
               ':incoming_decision_date' => date("Y-m-d"),
-              ':teacherTransfer_id' => $data['teacherTransfer_id'],
+              ':teacher_transfer_id' => $data['teacher_transfer_id'],
             ));
 
             return $statement->rowCount();
@@ -93,7 +93,7 @@ class TeacherTransferModel {
     public function getTeacherTreansferRequest($user_id)
     {
       $statement = " 
-        SELECT tt.teacherTransfer_id, tt.teacher_supporting_document, 
+        SELECT tt.teacher_transfer_id, tt.teacher_supporting_document, 
 
         tt.requested_school_id,
         (
@@ -135,7 +135,7 @@ class TeacherTransferModel {
     public function getTeacherTreansferRequestForRequestedDde($user_id)
     {
       $statement = " 
-      SELECT tt.teacherTransfer_id, tt.techer_id,
+      SELECT tt.teacher_transfer_id, tt.techer_id,
               tt.school_from_id,
               (
                   SELECT s.school_name FROM schools s WHERE s.school_id = tt.school_from_id
@@ -193,32 +193,32 @@ class TeacherTransferModel {
     public function getTeacherTreansferRequestForOutgoingDde($user_id)
     {
       $statement = " 
-            SELECT tt.teacherTransfer_id, tt.techer_id,
+      SELECT tt.teacher_transfer_id, tt.techer_id,
             tt.requested_school_id,
-                    
-                    (
-                        SELECT s.school_name FROM schools s WHERE s.school_id = tt.requested_school_id
-                    ) requested_school_name,
-                    (
-                        SELECT sl.district_name
-                      FROM schools s 
-                      INNER JOIN school_location sl ON sl.village_id = s.region_code
-                      WHERE s.school_id = tt.requested_school_id
-                    ) requested_school_district,
-                    (
-                        SELECT sl.sector_name
-                      FROM schools s 
-                      INNER JOIN school_location sl ON sl.village_id = s.region_code
-                      WHERE s.school_id = tt.requested_school_id
-                    ) requested_school_sector,
-                    tt.requested_date
+        
+        (
+          SELECT s.school_name FROM schools s WHERE s.school_id = tt.requested_school_id
+      ) requested_school_name,
+      (
+          SELECT sl.district_name
+        FROM schools s 
+        INNER JOIN school_location sl ON sl.village_id = s.region_code
+        WHERE s.school_id = tt.requested_school_id
+      ) requested_school_district,
+      (
+          SELECT sl.sector_name
+        FROM schools s 
+        INNER JOIN school_location sl ON sl.village_id = s.region_code
+        WHERE s.school_id = tt.requested_school_id
+      ) requested_school_sector,
+      tt.requested_date
 
-                    
+      
 
-            FROM teacher_transfer tt
-            INNER JOIN schools s ON s.school_id = tt.requested_school_id
-            INNER JOIN school_location sl ON sl.village_id = s.region_code
-            WHERE sl.district_code = ?";
+FROM teacher_transfer tt
+INNER JOIN schools s ON s.school_id = tt.requested_school_id
+INNER JOIN school_location sl ON sl.village_id = s.region_code
+WHERE sl.district_code = ?";
 
       try {
           $statement = $this->db->prepare($statement);
