@@ -177,12 +177,16 @@ class TeacherTransferModel {
 
     public function getTeacherTreansferRequestForRequestedDde($user_id)
     {
-      $district_code_array = $this->getDdeDistrictId($user_id);
+      
+       $district_code_array = $this->getDdeDistrictId($user_id);
        $district_code = $district_code_array[0]['district_code'];
       
       $statement = " 
       SELECT tt.teacher_transfer_id, 
       tt.techer_id teacher_id,
+              (
+                  SELECT u.full_name FROM users u WHERE u.user_id = tt.techer_id
+              ) teacher_full_name,
               (
                   SELECT u.first_name FROM users u WHERE u.user_id = tt.techer_id
               ) teacher_first_name,
