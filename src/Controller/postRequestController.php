@@ -185,9 +185,6 @@
       if (empty($input['dde_post_request'])) {
           return false;
       }
-      if (empty($input['district_code'])){
-        return false;
-      }
       return true;
     }
 

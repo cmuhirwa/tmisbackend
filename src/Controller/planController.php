@@ -21,13 +21,7 @@
     function processRequest()
     {
         switch ($this->request_method) {
-            case 'GET':
-              if(sizeof($this->params) == 1){
-                $response = $this->getCalendar($this->params['id']);
-              }else{
-                $response = $this->getCalendars();
-              }
-              break;
+            
             case 'POST':
               $response = $this->addPlan();
               break;
@@ -35,6 +29,15 @@
               if(sizeof($this->params) == 1){
                 $response = $this->deletePlan($this->params['id']);
               }
+              break;
+
+              case 'GET':
+                if(sizeof($this->params) == 1){
+                  $response = $this->getCalendar($this->params['id']);
+                }else{
+                  $response = $this->getCalendars();
+                }
+                break;
             default:
               $response = Errors::notFoundError('plan not found');
             break;
