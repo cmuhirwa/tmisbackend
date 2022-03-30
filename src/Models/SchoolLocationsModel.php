@@ -14,7 +14,7 @@ class SchoolLocationsModel {
       $statement = "
         SELECT DISTINCT 
             district_code, district_name 
-        FROM schoollocation ORDER BY district_code, district_name
+        FROM school_location ORDER BY district_code, district_name
       ";
       try {
         $statement = $this->db->prepare($statement);
@@ -31,7 +31,7 @@ class SchoolLocationsModel {
       SELECT DISTINCT 
         district_code, district_name
       FROM 
-        schoollocation 
+        school_location 
       WHERE 
         district_code=? ORDER BY district_code, district_name
     ";
@@ -51,7 +51,7 @@ class SchoolLocationsModel {
       SELECT DISTINCT 
         sector_code, sector_name 
       FROM 
-        schoollocation 
+        school_location 
       WHERE 
         sector_code=? ORDER BY sector_code, sector_name";
     try {

@@ -174,8 +174,7 @@ class TeacherTransferModel {
 
     public function getTeacherTreansferRequestForRequestedDde($user_id)
     {
-      $ddiId ='d0a46cdd-b72f-4214-89d0-2a057c64b0e3';
-      $district_code_array = $this->getDdeDistrictId($ddiId);
+      $district_code_array = $this->getDdeDistrictId($user_id);
        $district_code = $district_code_array[0]['district_code'];
       
       $statement = " 
