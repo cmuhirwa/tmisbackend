@@ -52,11 +52,11 @@ class ChangeTeacherStatusModle {
         if($data['decision'] == 'SUSPENDED'){
           $decided_to_suspend_from  =$data['decided_to_suspend_from'];
           $decided_to_suspend_to    =$data['decided_to_suspend_to'];
-        }elseif($data['decision'] == 'TERMINATED'){
+        }elseif($data['decision'] == 'TERMINATED' || $data['decision'] == 'REJECTED'){
           $decided_to_suspend_from  =null;
           $decided_to_suspend_to =null;
         }
-      $sql = "
+        $sql = "
             UPDATE 
               change_staff_status
             SET 
@@ -75,6 +75,54 @@ class ChangeTeacherStatusModle {
               ':decided_to_suspend_to' => $decided_to_suspend_to,
               ':decided_by_comment' => $data['decided_by_comment'],
               ':decided_by_date' => date("Y-m-d"),
+            ));
+            if($data['decision'] != 'REJECTED'){
+              $this->getTeacherIdToTerminateOrSuspend($data['change_staff_status_id'], $data['decision']);
+            }
+            return $statement->rowCount();
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
+
+    function getTeacherIdToTerminateOrSuspend($change_staff_status_id, $decision)
+    {
+      $statement = "
+          SELECT staff_to_changestatus_id 
+          FROM change_staff_status 
+          WHERE change_staff_status_id= ?
+        ";
+
+        try {
+          $statement = $this->db->prepare($statement);
+          $statement->execute(array($change_staff_status_id));
+          $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+          $techer_id = $result[0]['staff_to_changestatus_id'];
+
+          $this->suspendOrTerminateATeacher($techer_id, $decision);
+
+          return $result;
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }
+    }
+
+    function suspendOrTerminateATeacher($techer_id, $decision)
+    {
+      $sql = "
+            UPDATE 
+              user_to_role
+            SET 
+            status=:school_code
+
+            WHERE user_id=:user_id;
+        ";
+
+        try {
+            $statement = $this->db->prepare($sql);
+            $statement->execute(array(
+              ':status' => $decision,
+              ':user_id' => $techer_id,
             ));
 
             return $statement->rowCount();
