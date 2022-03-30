@@ -160,7 +160,7 @@ class TeacherTransferModel {
       
 
 
-        WHERE  tt.techer_id = ?";
+        WHERE  tt.techer_id = ? ORDER BY teacher_transfer_id DESC";
 
       try {
           $statement = $this->db->prepare($statement);
@@ -251,7 +251,7 @@ class TeacherTransferModel {
           FROM teacher_transfer tt
           INNER JOIN schools s ON s.school_code = tt.requested_school_id
           INNER JOIN school_location sl ON sl.village_id = s.region_code
-          WHERE sl.district_code = ? ORDER BY teacher_transfer_id DESC";
+          WHERE sl.district_code = ?";
 
       try {
           $statement = $this->db->prepare($statement);
