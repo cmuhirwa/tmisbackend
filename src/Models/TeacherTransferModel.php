@@ -59,7 +59,7 @@ class TeacherTransferModel {
         } 
     }
 
-    public function ddeTransferDecision($data, $user_id)
+    public function incomingDdeTransferDecision($data, $user_id)
     {
       if($data['requested_status'] == 'APPROVED'){
         $approved_school_id  = $data['approved_school_id'];
@@ -92,6 +92,35 @@ class TeacherTransferModel {
         }
     }
 
+    public function outgoingDdeTransferDecision($data, $user_id)
+    {
+      $sql = "
+            UPDATE 
+              teacher_transfer
+            SET 
+
+            outgoinng_dde_id=:outgoinng_dde_id,outgoing_status=:outgoing_status,outgoing_dde_comment=:outgoing_dde_comment,	outgoing_decision_date=:outgoing_decision_date
+
+            WHERE teacher_transfer_id=:teacher_transfer_id;
+        ";
+
+        try {
+            $statement = $this->db->prepare($sql);
+            $statement->execute(array(
+              ':outgoinng_dde_id' => $user_id,
+              ':outgoing_status' => $data['outgoing_status'],
+              ':outgoing_dde_comment' => $data['outgoing_dde_comment'],
+              ':outgoing_decision_date' => date("Y-m-d"),
+              ':teacher_transfer_id' => $data['teacher_transfer_id'],
+            ));
+
+            return $statement->rowCount();
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
+
+
     public function getTeacherTreansferRequest($user_id)
     {
       $statement = " 
@@ -102,24 +131,24 @@ class TeacherTransferModel {
 
         tt.requested_school_id,
         (
-            SELECT s.school_name FROM schools s WHERE s.school_id = tt.requested_school_id
+            SELECT s.school_name FROM schools s WHERE s.school_code = tt.requested_school_id
         ) requested_school_name,
         (
             SELECT sl.district_name
           FROM schools s 
           INNER JOIN school_location sl ON sl.village_id = s.region_code
-          WHERE s.school_id = tt.requested_school_id
+          WHERE s.school_code = tt.requested_school_id
         ) requested_school_district,
         (
             SELECT sl.sector_name
           FROM schools s 
           INNER JOIN school_location sl ON sl.village_id = s.region_code
-          WHERE s.school_id = tt.requested_school_id
+          WHERE s.school_code = tt.requested_school_id
         ) requested_school_sector,
 
         tt.approved_school_id,
         (
-            SELECT s.school_name FROM schools s WHERE s.school_id = tt.approved_school_id
+            SELECT s.school_name FROM schools s WHERE s.school_code = tt.approved_school_id
         ) approved_school_name,
 
         tt.requested_status, tt.teacher_requested_transfer_date, tt.teacher_reason,
@@ -146,50 +175,83 @@ class TeacherTransferModel {
     public function getTeacherTreansferRequestForRequestedDde($user_id)
     {
       $statement = " 
-      SELECT tt.teacher_transfer_id, tt.techer_id,
+        SELECT tt.teacher_transfer_id, 
+				tt.techer_id teacher_id,
+                (
+                    SELECT u.first_name FROM users u WHERE u.user_id = tt.techer_id
+                ) teacher_first_name,
+                (
+                    SELECT u.last_name FROM users u WHERE u.user_id = tt.techer_id
+                ) teacher_last_name,
+                (
+                    SELECT u.phone_numbers FROM users u WHERE u.user_id = tt.techer_id
+                ) teacher_phone_number,
+                
               tt.school_from_id,
               (
-                  SELECT s.school_name FROM schools s WHERE s.school_id = tt.school_from_id
+                  SELECT s.school_name FROM schools s WHERE s.school_code = tt.school_from_id
               ) school_from_name,
       
               (
                 SELECT sl.district_name
                 FROM schools s 
                 INNER JOIN school_location sl ON sl.village_id = s.region_code
-                WHERE s.school_id = tt.school_from_id
+                WHERE s.school_code = tt.school_from_id
               ) school_from_district,
               (
                   SELECT sl.sector_name
                 FROM schools s 
                 INNER JOIN school_location sl ON sl.village_id = s.region_code
-                WHERE s.school_id = tt.school_from_id
+                WHERE s.school_code = tt.school_from_id
               ) school_from_sector,
-              tt.requested_date,
+              
+              tt.teacher_requested_transfer_date,
 
               tt.requested_school_id,
               (
-                  SELECT s.school_name FROM schools s WHERE s.school_id = tt.requested_school_id
+                  SELECT s.school_name FROM schools s WHERE s.school_code = tt.requested_school_id
               ) requested_school_name,
               (
                   SELECT sl.district_name
                 FROM schools s 
                 INNER JOIN school_location sl ON sl.village_id = s.region_code
-                WHERE s.school_id = tt.requested_school_id
+                WHERE s.school_code = tt.requested_school_id
               ) requested_school_district,
               (
                   SELECT sl.sector_name
                 FROM schools s 
                 INNER JOIN school_location sl ON sl.village_id = s.region_code
-                WHERE s.school_id = tt.requested_school_id
+                WHERE s.school_code = tt.requested_school_id
               ) requested_school_sector,
-              tt.requested_date
+              
+              tt.requested_status, tt.incoming_decision_date, tt.requested_dde_id, tt.requested_comment,
+             
+             tt.approved_school_id,
+              (
+                  SELECT s.school_name FROM schools s WHERE s.school_code = tt.approved_school_id
+              ) approved_school_name,
+              (
+                  SELECT sl.district_name
+                FROM schools s 
+                INNER JOIN school_location sl ON sl.village_id = s.region_code
+                WHERE s.school_code = tt.approved_school_id
+              ) approved_school_district,
+              (
+                  SELECT sl.sector_name
+                FROM schools s 
+                INNER JOIN school_location sl ON sl.village_id = s.region_code
+                WHERE s.school_code = tt.approved_school_id
+              ) approved_school_sector,
+              
+              tt.outgoing_status, tt.outgoing_decision_date, tt.outgoinng_dde_id, tt.outgoing_dde_comment
+              
       
               
       
-      FROM teacher_transfer tt
-      INNER JOIN schools s ON s.school_id = tt.requested_school_id
-      INNER JOIN school_location sl ON sl.village_id = s.region_code
-      WHERE sl.district_code =  ?";
+          FROM teacher_transfer tt
+          INNER JOIN schools s ON s.school_code = tt.requested_school_id
+          INNER JOIN school_location sl ON sl.village_id = s.region_code
+          WHERE sl.district_code = ?";
 
       try {
           $statement = $this->db->prepare($statement);
@@ -209,26 +271,26 @@ class TeacherTransferModel {
             tt.requested_school_id, 
         
         (
-          SELECT s.school_name FROM schools s WHERE s.school_id = tt.requested_school_id
+          SELECT s.school_name FROM schools s WHERE s.school_code = tt.requested_school_id
       ) requested_school_name,
       (
           SELECT sl.district_name
         FROM schools s 
         INNER JOIN school_location sl ON sl.village_id = s.region_code
-        WHERE s.school_id = tt.requested_school_id
+        WHERE s.school_code = tt.requested_school_id
       ) requested_school_district,
       (
           SELECT sl.sector_name
         FROM schools s 
         INNER JOIN school_location sl ON sl.village_id = s.region_code
-        WHERE s.school_id = tt.requested_school_id
+        WHERE s.school_code = tt.requested_school_id
       ) requested_school_sector,
       tt.teacher_requested_transfer_date
 
       
 
       FROM teacher_transfer tt
-      INNER JOIN schools s ON s.school_id = tt.requested_school_id
+      INNER JOIN schools s ON s.school_code = tt.requested_school_id
       INNER JOIN school_location sl ON sl.village_id = s.region_code
       WHERE sl.district_code = ?";
 

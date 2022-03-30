@@ -47,7 +47,14 @@
 
             // UPDATE DATA
             case 'PATCH':
-              $response = $this->ddeTransferDecision();
+              if(sizeof($this->params) > 0){
+                if($this->params['action'] == 'incoming'){
+                  $response = $this->incomingDdeTransferDecision();
+                }
+                elseif($this->params['action'] == 'outgoing'){
+                  $response = $this->outgoingDdeTransferDecision();
+                }
+              }
             break;
             default:
               $response = Errors::notFoundError("no request provided");
@@ -60,21 +67,8 @@
     }
 
     function getTeacherTreansferRequest(){
-      $jwt_data = new \stdClass();
-
-      $all_headers = getallheaders();
-      if(isset($all_headers['Authorization'])){
-        $jwt_data->jwt = $all_headers['Authorization'];
-      }
-      // Decoding jwt
-      if(empty($jwt_data->jwt)){
-        return Errors::notAuthorized();
-      }
-      if(!AuthValidation::isValidJwt($jwt_data)){
-        return Errors::notAuthorized();
-      }
-
-      $user_id = AuthValidation::decodedData($jwt_data)->data->id;
+      $user_id = $this->getUserId();
+      
       $result = $this->teacherTransferModel->getTeacherTreansferRequest($user_id);
         
       $response['status_code_header'] = 'HTTP/1.1 200 OK';
@@ -83,21 +77,8 @@
     }
 
     function getTeacherTreansferRequestFoRequestedDde(){
-      $jwt_data = new \stdClass();
-
-      $all_headers = getallheaders();
-      if(isset($all_headers['Authorization'])){
-        $jwt_data->jwt = $all_headers['Authorization'];
-      }
-      // Decoding jwt
-      if(empty($jwt_data->jwt)){
-        return Errors::notAuthorized();
-      }
-      if(!AuthValidation::isValidJwt($jwt_data)){
-        return Errors::notAuthorized();
-      }
-
-      $user_id = AuthValidation::decodedData($jwt_data)->data->id;
+      $user_id = $this->getUserId();
+      
       $result = $this->teacherTransferModel->getTeacherTreansferRequestForRequestedDde($user_id);
         
       $response['status_code_header'] = 'HTTP/1.1 200 OK';
@@ -107,21 +88,8 @@
 
 
     function getTeacherTreansferRequestFoOutgoingDde(){
-      $jwt_data = new \stdClass();
-
-      $all_headers = getallheaders();
-      if(isset($all_headers['Authorization'])){
-        $jwt_data->jwt = $all_headers['Authorization'];
-      }
-      // Decoding jwt
-      if(empty($jwt_data->jwt)){
-        return Errors::notAuthorized();
-      }
-      if(!AuthValidation::isValidJwt($jwt_data)){
-        return Errors::notAuthorized();
-      }
-
-      $user_id = AuthValidation::decodedData($jwt_data)->data->id;
+      $user_id = $this->getUserId();
+      
       $result = $this->teacherTransferModel->getTeacherTreansferRequestForOutgoingDde($user_id);
         
       $response['status_code_header'] = 'HTTP/1.1 200 OK';
@@ -140,21 +108,7 @@
     }
 
     function teacherRequestATransfer(){
-      $jwt_data = new \stdClass();
-
-      $all_headers = getallheaders();
-      if(isset($all_headers['Authorization'])){
-        $jwt_data->jwt = $all_headers['Authorization'];
-      }
-      // Decoding jwt
-      if(empty($jwt_data->jwt)){
-        return Errors::notAuthorized();
-      }
-      if(!AuthValidation::isValidJwt($jwt_data)){
-        return Errors::notAuthorized();
-      }
-
-      $user_id = AuthValidation::decodedData($jwt_data)->data->id;
+      $user_id = $this->getUserId();
 
       $data = (array) json_decode(file_get_contents('php://input'), TRUE);
 
@@ -170,22 +124,8 @@
       return $response;
     }
 
-    function ddeTransferDecision(){
-      $jwt_data = new \stdClass();
-
-      $all_headers = getallheaders();
-      if(isset($all_headers['Authorization'])){
-        $jwt_data->jwt = $all_headers['Authorization'];
-      }
-      // Decoding jwt
-      if(empty($jwt_data->jwt)){
-        return Errors::notAuthorized();
-      }
-      if(!AuthValidation::isValidJwt($jwt_data)){
-        return Errors::notAuthorized();
-      }
-
-      $user_id = AuthValidation::decodedData($jwt_data)->data->id;
+    function incomingDdeTransferDecision(){
+      $user_id = $this->getUserId();
 
       $data = (array) json_decode(file_get_contents('php://input'), TRUE);
 
@@ -202,8 +142,26 @@
         }
       }
         // CALL MODELS TO REQUEST TO A TRANSFER
-          $result = $this->teacherTransferModel->ddeTransferDecision($data, $user_id);
+          $result = $this->teacherTransferModel->incomingDdeTransferDecision($data, $user_id);
         
+      $response['status_code_header'] = 'HTTP/1.1 200 OK';
+      $response['body'] = json_encode($result);
+      return $response;
+    }
+
+    function outgoingDdeTransferDecision(){
+      $user_id = $this->getUserId();
+
+      $data = (array) json_decode(file_get_contents('php://input'), TRUE);
+
+      // CHECK IF ITS AN APPROVAL OR REJECTION
+      // Validate input if not empty
+      if(!self::validateOutgoingDdeApproveDecisionInfo($data)){
+            return Errors::unprocessableEntityResponse();
+      }
+      // CALL MODELS TO REQUEST TO A TRANSFER
+        $result = $this->teacherTransferModel->outgoingDdeTransferDecision($data, $user_id);
+      
       $response['status_code_header'] = 'HTTP/1.1 200 OK';
       $response['body'] = json_encode($result);
       return $response;
@@ -252,6 +210,40 @@
         return false;
       }
       return true;
+    }
+
+    private function validateOutgoingDdeApproveDecisionInfo($input)
+    {
+     
+      if (empty($input['teacher_transfer_id'])) {
+        return false;
+      }
+      if (empty($input['outgoing_status'])) {
+        return false;
+      }
+      if (empty($input['outgoing_dde_comment'])) {
+        return false;
+      }
+
+      return true;
+    }
+
+    private function getUserId(){
+      $jwt_data = new \stdClass();
+
+      $all_headers = getallheaders();
+      if(isset($all_headers['Authorization'])){
+        $jwt_data->jwt = $all_headers['Authorization'];
+      }
+      // Decoding jwt
+      if(empty($jwt_data->jwt)){
+        return Errors::notAuthorized();
+      }
+      if(!AuthValidation::isValidJwt($jwt_data)){
+        return Errors::notAuthorized();
+      }
+
+      return AuthValidation::decodedData($jwt_data)->data->id;
     }
   }
     $controller = new teacherTransferController($this->db, $request_method,$params);
