@@ -54,6 +54,9 @@
                 elseif($this->params['action'] == 'outgoing'){
                   $response = $this->outgoingDdeTransferDecision();
                 }
+                elseif($this->params['action'] == 'leaving'){
+                  $response = $this->teacherLeaving();
+                }
               }
             break;
             default:
@@ -167,6 +170,22 @@
       return $response;
     }
 
+    function teacherLeaving(){
+      $data = (array) json_decode(file_get_contents('php://input'), TRUE);
+
+      // CHECK IF ITS AN APPROVAL OR REJECTION
+      // Validate input if not empty
+      if(!self::validateTeacherLeaving($data)){
+            return Errors::unprocessableEntityResponse();
+      }
+      // CALL MODELS TO REQUEST TO A TRANSFER
+        $result = $this->teacherTransferModel->teacherLeaving($data['teacher_transfer_id']);
+      
+      $response['status_code_header'] = 'HTTP/1.1 200 OK';
+      $response['body'] = json_encode($result);
+      return $response;
+    }
+
     private function validateTeacherTransferRequestInfo($input)
     {
       if (empty($input['school_from_id'])) {
@@ -244,6 +263,13 @@
       }
 
       return AuthValidation::decodedData($jwt_data)->data->id;
+    }
+
+    function validateTeacherLeaving($input){
+      if (empty($input['teacher_transfer_id'])) {
+        return false;
+      }
+      return true;
     }
   }
     $controller = new teacherTransferController($this->db, $request_method,$params);

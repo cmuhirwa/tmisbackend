@@ -379,5 +379,27 @@ class TeacherTransferModel {
             exit($e->getMessage());
         }
     }
+
+    function teacherLeaving($teacher_transfer_id){
+      
+      $sql = "
+      UPDATE 
+      teacher_transfer
+    SET 
+
+    teacher_requested_leaving_date= now()
+    WHERE teacher_transfer_id =:teacher_transfer_id;
+        ";
+
+        try {
+            $statement = $this->db->prepare($sql);
+            $statement->execute(array(
+              ':teacher_transfer_id' => $teacher_transfer_id
+            ));
+            return $statement->rowCount();
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
+    }
 }
 ?>
