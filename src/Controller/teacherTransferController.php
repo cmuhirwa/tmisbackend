@@ -29,13 +29,13 @@
                   $response = $this->getSchoolsPerDistrict($this->params['id']);
                 }
                 elseif($this->params['action'] == 'teacher'){
-                  $response = $this->getTeacherTreansferRequest($this->params['id']);
+                  $response = $this->getTeacherTreansferRequest();
                 }
                 elseif($this->params['action'] == 'requesteddde'){
-                  $response = $this->getTeacherTreansferRequestFoRequestedDde($this->params['id']);
+                  $response = $this->getTeacherTreansferRequestFoRequestedDde();
                 }
                 elseif($this->params['action'] == 'outgoingdde'){
-                  $response = $this->getTeacherTreansferRequestFoOutgoingDde($this->params['id']);
+                  $response = $this->getTeacherTreansferRequestFoOutgoingDde();
                 }
               }
             break;
