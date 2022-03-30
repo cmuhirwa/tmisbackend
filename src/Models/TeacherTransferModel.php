@@ -94,6 +94,7 @@ class TeacherTransferModel {
 
     public function outgoingDdeTransferDecision($data, $user_id)
     {
+
       $sql = "
             UPDATE 
               teacher_transfer
@@ -113,7 +114,9 @@ class TeacherTransferModel {
               ':outgoing_decision_date' => date("Y-m-d"),
               ':teacher_transfer_id' => $data['teacher_transfer_id'],
             ));
-
+            if($data['outgoing_status'] == 'APPROVED'){
+              $this->getASchoolToTransferApprovedTeacher($data['teacher_transfer_id']);
+            }
             return $statement->rowCount();
         } catch (\PDOException $e) {
             exit($e->getMessage());
@@ -324,6 +327,53 @@ class TeacherTransferModel {
       } catch (\PDOException $e) {
           exit($e->getMessage());
       }
+    }
+
+    function getASchoolToTransferApprovedTeacher($teacher_transfer_id)
+    {
+      $statement = "
+          SELECT techer_id, approved_school_id 
+          FROM teacher_transfer 
+          WHERE teacher_transfer_id= ?
+        ";
+
+        try {
+          $statement = $this->db->prepare($statement);
+          $statement->execute(array($teacher_transfer_id));
+          $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+          $techer_id = $result[0]['techer_id'];
+          $approved_school_id = $result[0]['approved_school_id'];
+
+          $this->transferTheTeacherToTheApprovedSchool($techer_id, $approved_school_id);
+
+          return $result;
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }
+    }
+
+    function transferTheTeacherToTheApprovedSchool($techer_id, $approved_school_id)
+    {
+      $sql = "
+            UPDATE 
+              user_to_role
+            SET 
+            school_code=:school_code
+
+            WHERE user_id=:user_id;
+        ";
+
+        try {
+            $statement = $this->db->prepare($sql);
+            $statement->execute(array(
+              ':school_code' => $approved_school_id,
+              ':user_id' => $techer_id,
+            ));
+
+            return $statement->rowCount();
+        } catch (\PDOException $e) {
+            exit($e->getMessage());
+        }
     }
 }
 ?>

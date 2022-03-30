@@ -165,10 +165,11 @@
             return Errors::unprocessableEntityResponse();
           }
           // CALL MODELS TO REQUEST TO ERMINATE
-          $result = $this->changeTeacherStatusModle->changeTeacherStatusRequest($data, $user_id);
+          $result = $this->changeTeacherStatusModle->changeTeacherStatusDecision($data, $user_id);
+      }elseif($data['decision'] == 'REJECTED'){
+        $result = $this->changeTeacherStatusModle->changeTeacherStatusDecision($data, $user_id);
       }
         
-     
       $response['status_code_header'] = 'HTTP/1.1 200 OK';
       $response['body'] = json_encode($result);
       return $response;
