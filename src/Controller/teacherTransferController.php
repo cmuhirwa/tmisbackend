@@ -190,12 +190,12 @@
       $data = (array) json_decode(file_get_contents('php://input'), TRUE);
 
       // CHECK IF ITS AN APPROVAL OR REJECTION
-      if($data['incoming_decision']== 'APPROVED'){
+      if($data['requested_status']== 'APPROVED'){
          // Validate input if not empty
         if(!self::validateIncomingDdeApproveDecisionInfo($data)){
               return Errors::unprocessableEntityResponse();
         }
-      }elseif($data['incoming_decision']== 'REJECTED')
+      }elseif($data['requested_status']== 'REJECTED')
       {
         if(!self::validateIncomingDdeRejectDecisionInfo($data)){
           return Errors::unprocessableEntityResponse();
@@ -214,7 +214,7 @@
       if (empty($input['school_from_id'])) {
         return false;
       }
-      if (empty($input['school_to_id'])) {
+      if (empty($input['requested_school_id'])) {
         return false;
       }
       if (empty($input['teacher_reason'])) {
@@ -223,73 +223,21 @@
       if (empty($input['teacher_supporting_document'])) {
           return false;
       }
-      // upload a supporting doc
-      	/*
-                      $fileName  =  $_FILES['teacher_supporting_document']['name'];
-                      $tempPath  =  $_FILES['teacher_supporting_document']['tmp_name'];
-                      $fileSize  =  $_FILES['teacher_supporting_document']['size'];
-                          
-                      if(empty($fileName))
-                      {
-                        $errorMSG = json_encode(array("message" => "please select image", "status" => false));	
-                        return $errorMSG;
-                      }
-                      else
-                      {
-                        $upload_path = './'; // set upload folder path 
-                        
-                        $fileExt = strtolower(pathinfo($fileName,PATHINFO_EXTENSION)); // get image extension
-                          
-                        // valid image extensions
-                        $valid_extensions = array('jpeg', 'jpg', 'png', 'gif'); 
-                                
-                        // allow valid image file formats
-                        if(in_array($fileExt, $valid_extensions))
-                        {				
-                          //check file not exist our upload folder path
-                          if(!file_exists($upload_path . $fileName))
-                          {
-                            // check file size '5MB'
-                            if($fileSize < 5000000){
-                              move_uploaded_file($tempPath, $upload_path . $fileName); // move file from system temporary path to our upload folder path 
-                            }
-                            else{		
-                              $errorMSG = json_encode(array("message" => "Sorry, your file is too large, please upload 5 MB size", "status" => false));	
-                              return $errorMSG;
-                            }
-                          }
-                          else
-                          {		
-                            $errorMSG = json_encode(array("message" => "Sorry, file already exists check upload folder", "status" => false));	
-                            return $errorMSG;
-                          }
-                        }
-                        else
-                        {		
-                          $errorMSG = json_encode(array("message" => "Sorry, only JPG, JPEG, PNG & GIF files are allowed", "status" => false));	
-                          return $errorMSG;		
-                        }
-                      }
-                      $input['teacher_supporting_document'];
-                      // if no error caused, continue ....
-                      
-                      */
-
       return true;
     }
 
     private function validateIncomingDdeApproveDecisionInfo($input)
     {
-      if (empty($input['teacherTransfer_id'])) {
+      if (empty($input['teacher_transfer_id'])) {
         return false;
       }
-      if (empty($input['incoming_decision'])) {
+      if (empty($input['requested_status'])) {
         return false;
       }
-      if (empty($input['incoming_approved_on_school_id'])) {
+      if (empty($input['approved_school_id'])) {
           return false;
       }
-      if (empty($input['incoming_comment'])) {
+      if (empty($input['requested_comment'])) {
           return false;
       }
       return true;
@@ -297,10 +245,10 @@
 
     private function validateIncomingDdeRejectDecisionInfo($input)
     {
-      if (empty($input['teacherTransfer_id'])) {
+      if (empty($input['teacher_transfer_id'])) {
         return false;
       }
-      if (empty($input['incoming_decision'])) {
+      if (empty($input['requested_status'])) {
         return false;
       }
       return true;
