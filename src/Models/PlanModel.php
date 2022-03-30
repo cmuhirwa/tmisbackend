@@ -28,7 +28,7 @@ class PlanModel {
     {
       $statement = "
         SELECT * FROM academic_calendar
-        WHERE academic_calendar_id = ? AND archive = ?
+        WHERE academic_year_id = ? AND archive = ?
       ";
 
       try {
@@ -88,8 +88,8 @@ class PlanModel {
             UPDATE 
               academic_calendar
             SET 
-                archive=:archive,archived_by=:archived_by,archived_date=:archived_date
-            WHERE academic_calendar_id=:plan_id;
+                archive=1,archived_by=1,archived_date=now()
+            WHERE academic_year_id= 1;
         ";
 
         try {

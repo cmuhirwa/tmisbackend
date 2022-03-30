@@ -12,7 +12,6 @@ class PositionModel {
 
     public function findAll()
     {
-
       $statement = " 
         SELECT p.position_id, p.position_code, p.position_name, sl.school_level_name, p.qualification_id, q.qualification_name
         FROM positions p  
