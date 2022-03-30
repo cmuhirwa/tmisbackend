@@ -13,20 +13,24 @@ class UserRoleModel {
       $statement = "
         INSERT 
           INTO user_to_role 
-            (user_id,role_id,country_id,district_code,sector_code,school_code,qualification_id,created_by)
-          VALUES (:user_id,:role_id,:country_id,:district_code,:sector_code,:school_code,:qualification_id,:created_by);
-        ";
+            (role_to_user_id, role_id,qualification_id, start_date_in_the_school, school_code, user_id, country_id, district_code, sector_code, position_id, academic_year_id, stakeholder_id, created_by)
+          VALUES
+            (:role_to_user_id, :role_id, :qualification_id, :start_date_in_the_school, :school_code, :user_id, :country_id, :district_code, :sector_code, :position_id, :academic_year_id, :stakeholder_id, :created_by)
+      ";
         try {
           $statement = $this->db->prepare($statement);
           $statement->execute(array(
+              ':role_to_user_id' => $data['role_to_user_id'],
               ':user_id' => $data['user_id'],
               ':role_id' => $data['role_id'],
               ':country_id' => $data['country_id'],
               ':district_code' => $data['district_code'],
               ':sector_code' => $data['sector_code'],
+              ':position_id' => $data['position_id'],
               ':school_code' => $data['school_code'],
               ':qualification_id' => $data['qualification_id'],
               ':academic_year_id' => $data['academic_year_id'],
+              ':start_date_in_the_school' => $data['start_date_in_the_school'],
               ':stakeholder_id' => $data['stakeholder_id'],
               ':created_by' => $user_id,
           ));
@@ -73,7 +77,7 @@ class UserRoleModel {
             $statement = $this->db->prepare($sql);
             $statement->execute(array(
                 ':user_id' => $user_id,
-                ':status' => "active"
+                ':status' => "Active"
             ));
 
             $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
@@ -85,7 +89,7 @@ class UserRoleModel {
     public function findCurrentSchoolTeachers($school_code){
         $sql = "
             SELECT 
-                user_id,role_id,qualification_id,academic_year_id 
+                user_id,role_id,qualification_id,academic_year_id
             FROM 
                 user_to_role
             WHERE school_code=:school_code
@@ -101,5 +105,29 @@ class UserRoleModel {
             exit($e->getMessage());
         } 
     }
-    
+  public function disableRole($user_id,$updated_by,$target,$status)
+  {
+      $sql = "
+          UPDATE 
+            user_to_role
+          SET 
+            status=:status,updated_by=:updated_by,updated_at=:updated_at
+          WHERE 
+            user_id=:user_id AND status=:target;
+      ";
+      try {
+          $statement = $this->db->prepare($sql);
+          $statement->execute(array(
+            ':user_id' => $user_id,
+            ':updated_by' => $updated_by,
+            ':updated_at' => date("Y-m-d H:i:s"),
+            ':target' => $target,
+            ':status' =>$status,
+          ));
+
+          return $statement->rowCount();
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }    
+  }
 }
