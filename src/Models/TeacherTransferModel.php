@@ -160,7 +160,7 @@ class TeacherTransferModel {
       
 
 
-        WHERE  tt.techer_id = ? ORDER BY teacher_transfer_id DESC";
+        WHERE  tt.techer_id = ?";
 
       try {
           $statement = $this->db->prepare($statement);
@@ -174,93 +174,98 @@ class TeacherTransferModel {
 
     public function getTeacherTreansferRequestForRequestedDde($user_id)
     {
+      $ddiId ='d0a46cdd-b72f-4214-89d0-2a057c64b0e3';
+      $district_code_array = $this->getDdeDistrictId($ddiId);
+       $district_code = $district_code_array[0]['district_code'];
+      
       $statement = " 
-        SELECT tt.teacher_transfer_id, 
-				tt.techer_id teacher_id,
-                (
-                    SELECT u.first_name FROM users u WHERE u.user_id = tt.techer_id
-                ) teacher_first_name,
-                (
-                    SELECT u.last_name FROM users u WHERE u.user_id = tt.techer_id
-                ) teacher_last_name,
-                (
-                    SELECT u.phone_numbers FROM users u WHERE u.user_id = tt.techer_id
-                ) teacher_phone_number,
-                
-              tt.school_from_id,
+      SELECT tt.teacher_transfer_id, 
+      tt.techer_id teacher_id,
               (
-                  SELECT s.school_name FROM schools s WHERE s.school_code = tt.school_from_id
-              ) school_from_name,
-      
+                  SELECT u.first_name FROM users u WHERE u.user_id = tt.techer_id
+              ) teacher_first_name,
               (
-                SELECT sl.district_name
-                FROM schools s 
-                INNER JOIN school_location sl ON sl.village_id = s.region_code
-                WHERE s.school_code = tt.school_from_id
-              ) school_from_district,
+                  SELECT u.last_name FROM users u WHERE u.user_id = tt.techer_id
+              ) teacher_last_name,
               (
-                  SELECT sl.sector_name
-                FROM schools s 
-                INNER JOIN school_location sl ON sl.village_id = s.region_code
-                WHERE s.school_code = tt.school_from_id
-              ) school_from_sector,
+                  SELECT u.phone_numbers FROM users u WHERE u.user_id = tt.techer_id
+              ) teacher_phone_number,
               
-              tt.teacher_requested_transfer_date,
+            tt.school_from_id,
+            (
+                SELECT s.school_name FROM schools s WHERE s.school_code = tt.school_from_id
+            ) school_from_name,
+    
+            (
+              SELECT sl.district_name
+              FROM schools s 
+              INNER JOIN school_location sl ON sl.village_id = s.region_code
+              WHERE s.school_code = tt.school_from_id
+            ) school_from_district,
+            (
+                SELECT sl.sector_name
+              FROM schools s 
+              INNER JOIN school_location sl ON sl.village_id = s.region_code
+              WHERE s.school_code = tt.school_from_id
+            ) school_from_sector,
+            
+            tt.teacher_requested_transfer_date,
 
-              tt.requested_school_id,
-              (
-                  SELECT s.school_name FROM schools s WHERE s.school_code = tt.requested_school_id
-              ) requested_school_name,
-              (
-                  SELECT sl.district_name
-                FROM schools s 
-                INNER JOIN school_location sl ON sl.village_id = s.region_code
-                WHERE s.school_code = tt.requested_school_id
-              ) requested_school_district,
-              (
-                  SELECT sl.sector_name
-                FROM schools s 
-                INNER JOIN school_location sl ON sl.village_id = s.region_code
-                WHERE s.school_code = tt.requested_school_id
-              ) requested_school_sector,
-              
-              tt.requested_status, tt.incoming_decision_date, tt.requested_dde_id, tt.requested_comment,
-             
-             tt.approved_school_id,
-              (
-                  SELECT s.school_name FROM schools s WHERE s.school_code = tt.approved_school_id
-              ) approved_school_name,
-              (
-                  SELECT sl.district_name
-                FROM schools s 
-                INNER JOIN school_location sl ON sl.village_id = s.region_code
-                WHERE s.school_code = tt.approved_school_id
-              ) approved_school_district,
-              (
-                  SELECT sl.sector_name
-                FROM schools s 
-                INNER JOIN school_location sl ON sl.village_id = s.region_code
-                WHERE s.school_code = tt.approved_school_id
-              ) approved_school_sector,
-              
-              tt.outgoing_status, tt.outgoing_decision_date, tt.outgoinng_dde_id, tt.outgoing_dde_comment
-              
-      
-              
-      
-          FROM teacher_transfer tt
-          INNER JOIN schools s ON s.school_code = tt.requested_school_id
-          INNER JOIN school_location sl ON sl.village_id = s.region_code
-          WHERE sl.district_code = ?";
+            tt.requested_school_id,
+            (
+                SELECT s.school_name FROM schools s WHERE s.school_code = tt.requested_school_id
+            ) requested_school_name,
+            (
+                SELECT sl.district_name
+              FROM schools s 
+              INNER JOIN school_location sl ON sl.village_id = s.region_code
+              WHERE s.school_code = tt.requested_school_id
+            ) requested_school_district,
+            (
+                SELECT sl.sector_name
+              FROM schools s 
+              INNER JOIN school_location sl ON sl.village_id = s.region_code
+              WHERE s.school_code = tt.requested_school_id
+            ) requested_school_sector,
+            
+            tt.requested_status, tt.incoming_decision_date, tt.requested_dde_id, tt.requested_comment,
+           
+           tt.approved_school_id,
+            (
+                SELECT s.school_name FROM schools s WHERE s.school_code = tt.approved_school_id
+            ) approved_school_name,
+            (
+                SELECT sl.district_name
+              FROM schools s 
+              INNER JOIN school_location sl ON sl.village_id = s.region_code
+              WHERE s.school_code = tt.approved_school_id
+            ) approved_school_district,
+            (
+                SELECT sl.sector_name
+              FROM schools s 
+              INNER JOIN school_location sl ON sl.village_id = s.region_code
+              WHERE s.school_code = tt.approved_school_id
+            ) approved_school_sector,
+            
+            tt.outgoing_status, tt.outgoing_decision_date, tt.outgoinng_dde_id, tt.outgoing_dde_comment
+            
+    
+            
+    
+        FROM teacher_transfer tt
+        INNER JOIN schools s ON s.school_code = tt.requested_school_id
+        INNER JOIN school_location sl ON sl.village_id = s.region_code
+        WHERE sl.district_code = ?";
 
       try {
           $statement = $this->db->prepare($statement);
-          $statement->execute(array(26));
+          $statement->execute(array($district_code));
           $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
           return $result;
       } catch (\PDOException $e) {
           exit($e->getMessage());
       }
+      
     }
 
     public function getTeacherTreansferRequestForOutgoingDde($user_id)
@@ -297,6 +302,22 @@ class TeacherTransferModel {
       try {
           $statement = $this->db->prepare($statement);
           $statement->execute(array(26));
+          $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+          return $result;
+      } catch (\PDOException $e) {
+          exit($e->getMessage());
+      }
+    }
+
+    function getDdeDistrictId($ddiId){
+      $statement = " 
+        SELECT district_code
+        FROM user_to_role WHERE
+       user_id = ?";
+
+      try {
+          $statement = $this->db->prepare($statement);
+          $statement->execute(array($ddiId));
           $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
           return $result;
       } catch (\PDOException $e) {
