@@ -93,6 +93,9 @@ $route->router("/changeTeacherStatusController/{action}", "src/Controller/change
 $route->router("/teachertransfer/{action}/{id}", "src/Controller/teacherTransferController.php");
 $route->router("/teachertransfers/{action}",  "src/Controller/teacherTransferController.php");
 
+// PROFILE
+$route->router("/profile/{usertype}/{id}", "src/Controller/profileController.php");
+
 
 //write it at the last
 //arg is 404 file location
