@@ -83,5 +83,25 @@ class SchoolLocationsModel {
         exit($e->getMessage());
     }
   }
+  public function findDistrictSectors($district_code)
+  {
+    $statement = "
+      SELECT
+        sector_name,sector_code 
+      FROM 
+        school_location 
+      WHERE 
+        sector_code LIKE ?
+    ";
+
+    try {
+      $statement = $this->db->prepare($statement);
+      $statement->execute(array($district_code.'%'));
+      $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+      return $result;
+    } catch (\PDOException $e) {
+        exit($e->getMessage());
+    }
+  }
 }
 ?>

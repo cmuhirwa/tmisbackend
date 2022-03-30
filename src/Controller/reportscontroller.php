@@ -10,6 +10,7 @@ use Src\Models\SchoolsModel;
 use Src\Models\SchoolLocationsModel;
 use Src\Models\SectorsModel;
 use Src\Models\StakeholdersModel;
+use Src\Models\SchoolLevelModel;
 use Src\System\AuthValidation;
 use Src\System\Errors;
 use stdClass;
@@ -23,6 +24,7 @@ use stdClass;
   private $districtsModel;
   private $schoolsModel;
   private $schoolLocationsModel;
+  private $schoolLevelModel;
   private $sectorsModel;
   private $stakeholdersModel;
   private $request_method;
@@ -42,6 +44,7 @@ use stdClass;
     $this->sectorsModel = new SectorsModel($db);
     $this->stakeholdersModel = new StakeholdersModel($db);
     $this->schoolLocationsModel = new SchoolLocationsModel($db);
+    $this->schoolLevelModel = new SchoolLevelModel($db);
   }
 
   function processRequest()
@@ -75,10 +78,22 @@ use stdClass;
     $school_staff = new stdClass();
 
     foreach ($result as $value) {
+      $new_user = new stdClass();
       $user = $this->usersModel->findById($value['user_id'],1);
       $role = $this->rolesModel->findById($value['role_id']);
+      // $level = $this->schoolLevelModel->findById($value['school_level_id']);
 
-      array_push($staff,$user[0]);
+      $new_user->user_id = sizeof($user) > 0 ? $user[0]['user_id'] : null;
+      $new_user->role_id = sizeof($role) > 0 ? $role[0]['role_id'] : null;
+      $new_user->role = sizeof($role) > 0 ? $role[0]['role'] :null;
+      $new_user->first_name = sizeof($user) > 0 ? $user[0]['first_name'] : null;
+      $new_user->last_name = sizeof($user) > 0 ? $user[0]['last_name'] : null;
+      $new_user->phone_numbers = sizeof($user) > 0 ? $user[0]['phone_numbers'] : null;
+      $new_user->email = sizeof($user) > 0 ? $user[0]['email'] : null;
+      $new_user->username = sizeof($user) > 0 ? $user[0]['username'] : null;
+      $new_user->status = sizeof($user) > 0 ? $user[0]['status'] : null;
+
+      array_push($staff,$new_user);
       array_push($roles,$role[0]);
     }
     $school_staff->staff = $staff;
