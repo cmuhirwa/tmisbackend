@@ -264,11 +264,13 @@ class TeacherTransferModel {
       } catch (\PDOException $e) {
           exit($e->getMessage());
       }
-      
     }
 
     public function getTeacherTreansferRequestForOutgoingDde($user_id)
     {
+      $district_code_array = $this->getDdeDistrictId($user_id);
+      $district_code = $district_code_array[0]['district_code'];
+     
       $statement = " 
 
       SELECT tt.teacher_transfer_id, tt.techer_id, tt.teacher_reason, tt.teacher_supporting_document,
@@ -300,7 +302,7 @@ class TeacherTransferModel {
 
       try {
           $statement = $this->db->prepare($statement);
-          $statement->execute(array(26));
+          $statement->execute(array(11));
           $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
           return $result;
       } catch (\PDOException $e) {
