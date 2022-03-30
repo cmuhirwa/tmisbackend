@@ -12,9 +12,9 @@ class PostsModel {
   public function distributeToSchool($data,$user_id){
     $statement = "
       UPDATE 
-        post_requests 
+        post_request
       SET
-        dde_id_distribution=:dde_id_distribution,dde_post_distribution=:dde_post_distribution,dde_distribution_comment=:dde_distribution_comment,dde_distribution_date=:dde_distribution_date
+        dde_id_distribution=:dde_id_distribution,dde_post_distribution=:dde_post_distribution,dde_distribution_comment=:dde_distribution_comment,updated_date=:updated_date
       WHERE 
         post_request_id=:post_request_id";
 
@@ -23,7 +23,7 @@ class PostsModel {
     SELECT 
       *
     FROM 
-        post_requests 
+        post_request 
     WHERE 
         post_request_id=:post_request_id";
     try {
@@ -33,7 +33,7 @@ class PostsModel {
             ':dde_id_distribution' => $user_id,
             ':dde_post_distribution' => $data['dde_post_distribution'],
             ':dde_distribution_comment' => $data['dde_distribution_comment'],
-            ':dde_distribution_date' => date('Y-m-d H:i:s'),
+            ':updated_date' => date('Y-m-d H:i:s'),
         ));
 
         $updatedRow = $this->db->prepare($updatedRow);
@@ -54,7 +54,7 @@ class PostsModel {
       SELECT
         district_code,qualification_id,academic_year_id,SUM(dde_post_request) as dde_post_request,SUM(head_teacher_post_request) as head_teacher_post_request 
       FROM 
-        post_requests 
+        post_request 
       WHERE 
         qualification_id=? AND academic_year_id=? AND district_code=?
     ";
@@ -73,7 +73,7 @@ class PostsModel {
       SELECT
       qualification_id, academic_year_id, SUM(dde_post_distribution) as dde_post_distribution 
       FROM 
-        post_requests 
+        post_request 
       WHERE 
       qualification_id=? AND academic_year_id=? AND district_code=?
       ";
@@ -91,18 +91,35 @@ class PostsModel {
       SELECT
         pr.*, sch.school_name, q.qualification_name, p.position_name
       FROM 
-        post_requests pr, schools sch, qualifications q, positions p
+        post_request pr, schools sch, qualifications q, positions p
       WHERE 
         pr.district_code=? AND pr.academic_year_id=? AND pr.school_code=sch.school_code AND pr.qualification_id=q.qualification_id AND pr.position_code=p.position_code
       ";
       try {
-      $statement = $this->db->prepare($statement);
-      $statement->execute(array($district_code,$academic_year_id,));
+        $statement = $this->db->prepare($statement);
+        $statement->execute(array($district_code,$academic_year_id,));
+        $statement = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        return $statement;
+      } catch (\PDOException $e) {
+        exit($e->getMessage());
+      }
+  }
+  public function allowedTeacherByQualification($district_code,$school_code,$qualification_id,$academic_year_id){
+    $sql = "
+      SELECT 
+        dde_post_distribution
+      FROM 
+        post_request
+      WHERE district_code=? AND school_code=? AND qualification_id=? AND academic_year_id=?
+    ";
+    try {
+      $statement = $this->db->prepare($sql);
+      $statement->execute(array($district_code,$school_code,$qualification_id,$academic_year_id));
       $statement = $statement->fetchAll(\PDO::FETCH_ASSOC);
       return $statement;
-      } catch (\PDOException $e) {
+    } catch (\PDOException $e) {
       exit($e->getMessage());
-      }
+    }
   }
 }
 ?>

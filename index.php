@@ -26,9 +26,11 @@ $route = new MainRoutes();
 // Users routes 
 $route->router("/user", "src/Controller/userscontroller.php");
 $route->router("/user/{id}","src/Controller/userscontroller.php");
+$route->router("/user/assign/role","src/Controller/userscontroller.php");
 $route->router("/user/account/{action}", "src/Controller/authcontroller.php");
 $route->router("/user/account/{action}/{user_id}", "src/Controller/userscontroller.php");
 $route->router("/user/current/info", "src/Controller/authcontroller.php");
+$route->router("/user/updateinfo/{action}/{user_id}", "src/Controller/authcontroller.php");
 
 // Roles routes
 $route->router("/role", "src/Controller/rolescontroller.php");
@@ -55,13 +57,14 @@ $route->router("/rebdistribution/{action}/{academic_year_id}", "src/Controller/r
 $route->router("/districtdistribution/{action}", "src/Controller/posts.php");
 $route->router("/districtdistribution/{action}/{district_code}/{academic_year_id}", "src/Controller/posts.php");
 
- // Reports routes
+// Reports routes
 $route->router("/report/school/{action}/{school_code}", "src/Controller/reportscontroller.php");
 $route->router("/report/district/{action}/{district_code}", "src/Controller/reportscontroller.php");
 
 
 // Basic info routes
 $route->router("/basicinfos/{action}", "src/Controller/basicinfocontroller.php");
+$route->router("/basicinfos/{action}/{district_code}", "src/Controller/basicinfocontroller.php");
 
         //---Clement Routes---//
 

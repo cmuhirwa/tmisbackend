@@ -13,9 +13,7 @@ use Src\System\AuthValidation;
 use Src\System\Errors;
 use Src\System\Encrypt;
 use Src\System\UuidGenerator;
-
-
-
+use Src\Validations\UserValidation;
 
   class AuthController {
   private $db;
@@ -64,6 +62,21 @@ use Src\System\UuidGenerator;
                 $response = Errors::notFoundError("Route not found!");
               }
               break;
+              case 'PATCH':
+                if(sizeof($this->params) > 0){
+                 if($this->params['action'] == "credential"){
+                  $response = $this->assignAccessToUser($this->params['user_id']);
+                }elseif($this->params['action'] == "password"){
+                  $response = $this->login();
+                }elseif($this->params['action'] == "profile"){
+                  $response = $this->updateAccount($this->params['user_id']);
+                }else{
+                  $response = Errors::notFoundError("Route not found!");
+                }
+              }else{
+                $response = Errors::notFoundError("Route not found!");
+              }
+                break;
             case 'DELETE':
             break;
           default:
@@ -80,14 +93,14 @@ use Src\System\UuidGenerator;
       
     $data = (array) json_decode(file_get_contents('php://input'), TRUE);
 
-    if (! self::validateAccountData($data)) {
+    if (!UserValidation::insertUser($data)) {
         return Errors::unprocessableEntityResponse();
     }
     
     // Check if user is registered
     $user = $this->usersModel->findByUsername($data['username']);
     if(sizeof($user) > 0) {
-        return Errors::ExistError("Phone is already exist");
+        return Errors::ExistError("Username is already exist");
     }
     // Encrypting default password
     $default_password = 12345;
@@ -104,7 +117,100 @@ use Src\System\UuidGenerator;
 
     $response['status_code_header'] = 'HTTP/1.1 201 Created';
     $response['body'] = json_encode([
-      'message' => "Created"
+      'message' => "Created",
+      'user_id' => $user_id
+    ]);
+    return $response;
+  }
+
+  function updateAccount($user_id){
+    $rlt = new \stdClass();
+    $jwt_data = new \stdClass();
+
+    $all_headers = getallheaders();
+    if(isset($all_headers['Authorization'])){
+      $jwt_data->jwt = $all_headers['Authorization'];
+    }
+    // Decoding jwt
+    if(empty($jwt_data->jwt)){
+      return Errors::notAuthorized();
+    }
+
+    if(!AuthValidation::isValidJwt($jwt_data)){
+        return Errors::notAuthorized();
+    }
+    $updated_by = AuthValidation::decodedData($jwt_data)->data->id;
+
+
+    $data = (array) json_decode(file_get_contents('php://input'), TRUE);
+
+    if (!UserValidation::updateUser($data)) {
+        return Errors::unprocessableEntityResponse();
+    }
+    
+    // // Check if user is registered
+    $user = $this->usersModel->findById($user_id,1);
+    if(sizeof($user) <= 0) {
+        return Errors::notFoundError("User not found");
+    }
+
+    // Check if user is registered
+    if(empty($user[0]['username']) && empty($data['username'])) {
+      // Check if username is registered
+      $user = $this->usersModel->findExistUserName($data['username'],$user_id,1);
+      if(sizeof($user) > 0){
+        return Errors::ExistError("Username is already exist");
+      }
+      // Encrypting default password
+      $default_password = 12345;
+      $default_password = Encrypt::saltEncryption($default_password);
+      $data['password'] = $default_password;
+
+      $this->usersModel->changeUsernameAndPassword($data,$user_id,$updated_by);
+    }
+ 
+    $this->usersModel->updateUser($data,$user_id,$updated_by);
+
+    $response['status_code_header'] = 'HTTP/1.1 201 Created';
+    $response['body'] = json_encode([
+      'message' => "Updated"
+    ]);
+    return $response;
+  }
+  // Assign access to user 
+  function assignAccessToUser($user_id){
+    $data = (array) json_decode(file_get_contents('php://input'), TRUE);
+    
+    $rlt = new \stdClass();
+    $jwt_data = new \stdClass();
+
+    $all_headers = getallheaders();
+    if(isset($all_headers['Authorization'])){
+      $jwt_data->jwt = $all_headers['Authorization'];
+    }
+    // Decoding jwt
+    if(empty($jwt_data->jwt)){
+      return Errors::notAuthorized();
+    }
+
+    if(!AuthValidation::isValidJwt($jwt_data)){
+        return Errors::notAuthorized();
+    }
+    // // Check if user is registered
+    $user = $this->usersModel->findExistUserName($data['username'],$user_id,1);
+    if(sizeof($user) > 0 ) {
+        return Errors::notFoundError("Username is already token!");
+    }
+    $updated_by = AuthValidation::decodedData($jwt_data)->data->id;
+    // Encrypting default password
+    $default_password = Encrypt::saltEncryption($data['password']);
+    $data['password'] = $default_password;
+
+    $result = $this->usersModel->changeUsernameAndPassword($data,$user_id,$updated_by);
+
+    $response['status_code_header'] = 'HTTP/1.1 200 OK';
+    $response['body'] = json_encode([
+      "message" => "Change updated!"
     ]);
     return $response;
   }
@@ -212,7 +318,6 @@ use Src\System\UuidGenerator;
 
       $iss = "localhost";
       $iat = time();
-      $nbf = $iat + 10;
       $eat = $iat + 21600;
       $aud = "myusers";
       $user_array_data = array(
@@ -225,7 +330,6 @@ use Src\System\UuidGenerator;
       $payload_info = array(
         "iss"=>$iss,
         "iat"=>$iat,
-        "nbf"=>$nbf,
         "eat"=>$eat,
         "aud"=>$aud,
         "data"=>$user_array_data

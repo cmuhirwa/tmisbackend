@@ -12,11 +12,11 @@ class AuthValidation {
     
     public static function isValidJwt($data){
         try {
-              $secret_key = "owt125";
-              JWT::decode($data->jwt, new Key($secret_key,'HS512'));
-              return true;   
+            $secret_key = "owt125";
+            JWT::decode($data->jwt, new Key($secret_key,'HS512'));
+            return true;   
         } catch (\Throwable $th) {
-        return false;
+            return false;
         }
 
     }
