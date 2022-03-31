@@ -406,7 +406,8 @@ class TeacherTransferModel {
       teacher_transfer
       SET 
 
-      teacher_requested_leaving_date= now()
+      teacher_requested_leaving_date= now(),
+      outgoing_status = 'PENDING'
       WHERE teacher_transfer_id =:teacher_transfer_id;
         ";
 
