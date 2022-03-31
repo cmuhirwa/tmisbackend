@@ -280,11 +280,30 @@ class TeacherTransferModel {
      
       $statement = " 
 
-      SELECT tt.teacher_transfer_id, tt.techer_id, tt.teacher_reason, tt.teacher_supporting_document,
+      SELECT tt.teacher_transfer_id, tt.techer_id, 
+	(
+         SELECT u.full_name FROM users u WHERE u.user_id = tt.techer_id
+      ) full_name,
+      
+      (
+         SELECT q.qualification_name
+          FROM user_to_role ur
+          INNER JOIN qualifications q ON q.qualification_id = ur.qualification_id
+          WHERE ur.user_id = tt.techer_id
+      ) qualification_name,
+      
+      (
+         SELECT p.position_name
+          FROM user_to_role ur
+          INNER JOIN positions p ON p.position_id = ur.position_id
+          WHERE ur.user_id = tt.techer_id
+      ) position_name,
+
+tt.teacher_reason, tt.teacher_supporting_document,
             tt.requested_school_id, 
         
-        (
-          SELECT s.school_name FROM schools s WHERE s.school_code = tt.requested_school_id
+      (
+         SELECT s.school_name FROM schools s WHERE s.school_code = tt.requested_school_id
       ) requested_school_name,
       (
           SELECT sl.district_name
@@ -385,10 +404,10 @@ class TeacherTransferModel {
       $sql = "
       UPDATE 
       teacher_transfer
-    SET 
+      SET 
 
-    teacher_requested_leaving_date= now()
-    WHERE teacher_transfer_id =:teacher_transfer_id;
+      teacher_requested_leaving_date= now()
+      WHERE teacher_transfer_id =:teacher_transfer_id;
         ";
 
         try {
