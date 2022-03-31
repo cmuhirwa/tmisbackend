@@ -301,6 +301,7 @@ class TeacherTransferModel {
 
         tt.teacher_reason, tt.teacher_supporting_document,
               tt.requested_school_id, 
+              tt.outgoing_status,
           
         (
           SELECT s.school_name FROM schools s WHERE s.school_code = tt.requested_school_id
